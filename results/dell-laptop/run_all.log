@@ -1,0 +1,74 @@
+== start 2026-11-24 01:31:04 machine=dell-laptop nproc=8 threads=[1 2 4 8 16 ] runs=5 secs=2 pairs=10
+== build
+make: Nothing to be done for 'all'.
+== sysinfo
+== correctness: list
+== test_list, 8 threads (= logical cores) ==
+/home/hoangyenduong/pc-a2/build/test_list 8
+[Frame 3 – Configuration] threads=8 ops/thread=20000 repeats=5
+  coarse+ttas        real     PASS                    5/5  correct
+  coarse+std         real     PASS                    5/5  correct
+  fine+ttas          real     PASS                    5/5  correct
+  fine+std           real     PASS                    5/5  correct
+  lazy+ttas          real     PASS                    5/5  correct
+  racy (control)     control  BUG DETECTED (ok)       0/5  correct   | first failure: return value != shadow, observed=2010, expected=2009
+ALL AS EXPECTED
+== test_list, 16 threads (2 x logical cores), 200 ops/thread ==
+/home/hoangyenduong/pc-a2/build/test_list 16 200 2
+[Frame 3 – Configuration] threads=16 ops/thread=200 repeats=2
+  coarse+ttas        real     PASS                    2/2  correct
+  coarse+std         real     PASS                    2/2  correct
+  fine+ttas          real     PASS                    2/2  correct
+  fine+std           real     PASS                    2/2  correct
+  lazy+ttas          real     PASS                    2/2  correct
+  racy (control)     control  BUG DETECTED (ok)       0/2  correct   | first failure: return value != shadow, observed=913, expected=931
+ALL AS EXPECTED
+== correctness: parallel A* (01:32:34)
+mode          threads     result status
+correct             1     50/50  PASS
+correct             2     50/50  PASS
+correct             4     50/50  PASS
+correct             8     50/50  PASS
+first-touch         1      0/50  no wrong cost (info)
+first-touch         2      0/50  no wrong cost (info)
+first-touch         4      0/50  no wrong cost (info)
+first-touch         8      1/50  wrong costs (info)
+h x 3               1     48/50  BUG DETECTED (ok)
+h x 3               2     47/50  BUG DETECTED (ok)
+h x 3               4     47/50  BUG DETECTED (ok)
+h x 3               8     44/50  BUG DETECTED (ok)
+ALL AS EXPECTED
+== tsan: parallel A* (01:32:36)
+TSAN astar: clean
+h x 3               2      5/5   BUG DETECTED (ok)
+h x 3               4      5/5   BUG DETECTED (ok)
+ALL AS EXPECTED
+== tsan: list (01:32:41)
+g++ -std=c++20 -O1 -g -fsanitize=thread -pthread -I/home/hoangyenduong/pc-a2/include /home/hoangyenduong/pc-a2/src/test_list.cpp -o /home/hoangyenduong/pc-a2/build/test_list_tsan
+[Frame 3 – Configuration] threads=8 ops/thread=2000 repeats=2
+  coarse+ttas        real     PASS                    2/2  correct
+  coarse+std         real     PASS                    2/2  correct
+  fine+ttas          real     PASS                    2/2  correct
+  fine+std           real     PASS                    2/2  correct
+  lazy+ttas          real     PASS                    2/2  correct
+racy (control): skipped under ThreadSanitizer (intentional race)
+ALL AS EXPECTED
+TSAN: clean
+== bench_list (01:32:54)
+list run 1 done (01:34:17)
+list run 2 done (01:35:39)
+list run 3 done (01:37:02)
+list run 4 done (01:38:24)
+list run 5 done (01:39:47)
+== astar (01:39:47)
+astar run 1 set teacher done (01:39:47)
+astar run 1 set random done (01:39:51)
+astar run 2 set teacher done (01:39:52)
+astar run 2 set random done (01:39:53)
+astar run 3 set teacher done (01:39:54)
+astar run 3 set random done (01:39:56)
+astar run 4 set teacher done (01:39:56)
+astar run 4 set random done (01:39:58)
+astar run 5 set teacher done (01:39:59)
+astar run 5 set random done (01:40:01)
+== done 2026-11-24 01:40:01
