@@ -10,6 +10,7 @@
 #include <vector>
 #include "lock.h"
 #include "sorted_list.h"
+#include "lazy_list.h"
 #include "bench_util.h"
 
 using namespace std::chrono;
@@ -79,6 +80,8 @@ bool with_list_type(const std::string& name, F&& f) {
     if (name == "fine+ttas")      { f(list_tag<FineList<int, lock_ttas>>{});   return true; }
     if (name == "fine+ttas_bo")   { f(list_tag<FineList<int, bo>>{});          return true; }
     if (name == "fine+std")       { f(list_tag<FineList<int, lock_std>>{});    return true; }
+    if (name == "lazy+ttas")      { f(list_tag<LazyList<int, lock_ttas>>{}); return true; }
+    if (name == "lazy+ttas_bo")   { f(list_tag<LazyList<int, bo>>{});        return true; }
     return false;
 }
 

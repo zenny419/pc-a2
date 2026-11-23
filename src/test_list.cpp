@@ -1,16 +1,5 @@
-// =====================================================================
-//  test_list.cpp — Part 2: correctness test for the concurrent sorted list
-//  [Frame 1] Properties: (S) after the parallel run, the list = exactly the expected
-//            set of elements, strictly increasing, no duplicates; (L) no deadlock.
-//  [Frame 2] Method: each thread only adds/removes its "own" keys
-//            (key % T == tid), but the keys are INTERLEAVED in the list, so threads
-//            keep modifying neighbouring nodes. Each thread keeps a sequential
-//            std::set as a shadow. At the end: list must == union of all shadows.
-//            Every returned value (true/false) must also match the shadow.
-//            Negative control: an UNLOCKED list must be caught by the test.
-//  Run: ./test_list <threads> <ops_per_thread> <repeats>
-// =====================================================================
 #include "sorted_list.h"
+#include "lazy_list.h"
 #include "test_util.h"
 #include <cstdio>
 #include <cstdlib>
@@ -100,6 +89,7 @@ int main(int argc, char** argv) {
     all &= test<CoarseList<long, lock_std>>("coarse+std", false, T, ops, reps, wd);
     all &= test<FineList<long, lock_ttas>>("fine+ttas", false, T, ops, reps, wd);
     all &= test<FineList<long, lock_std>>("fine+std", false, T, ops, reps, wd);
+    all &= test<LazyList<long, lock_ttas>>("lazy+ttas", false, T, ops, reps, wd);
 // #endif
     // The racy list has an intentional data race (negative control).
     // Under ThreadSanitizer it would always be reported, so skip it there;
