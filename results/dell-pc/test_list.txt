@@ -1,0 +1,20 @@
+== test_list, 12 threads (= logical cores) ==
+/home/hoangyenduong/pc-a2/build/test_list 12
+[Frame 3 – Configuration] threads=12 ops/thread=20000 repeats=5
+  coarse+ttas        real     PASS                    5/5  correct
+  coarse+std         real     PASS                    5/5  correct
+  fine+ttas          real     PASS                    5/5  correct
+  fine+std           real     PASS                    5/5  correct
+  lazy+ttas          real     PASS                    5/5  correct
+  racy (control)     control  BUG DETECTED (ok)       0/5  correct   | first failure: return value != shadow, observed=3041, expected=3043
+ALL AS EXPECTED
+== test_list, 24 threads (2 x logical cores), 200 ops/thread ==
+/home/hoangyenduong/pc-a2/build/test_list 24 200 2
+[Frame 3 – Configuration] threads=24 ops/thread=200 repeats=2
+  coarse+ttas        real     PASS                    2/2  correct
+  coarse+std         real     PASS                    2/2  correct
+  fine+ttas          real     PASS                    2/2  correct
+  fine+std           real     PASS                    2/2  correct
+  lazy+ttas          real     PASS                    2/2  correct
+  racy (control)     control  BUG DETECTED (ok)       0/2  correct   | first failure: return value != shadow, observed=1370, expected=1393
+ALL AS EXPECTED

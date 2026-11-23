@@ -1,0 +1,11 @@
+mode          threads     result status
+correct             1      5/5   PASS
+correct             2      5/5   PASS
+correct             4      5/5   PASS
+first-touch         1      0/5   no wrong cost (info)
+first-touch         2      0/5   no wrong cost (info)
+first-touch         4      0/5   no wrong cost (info)
+h x 3               1      5/5   BUG DETECTED (ok)
+h x 3               2      5/5   BUG DETECTED (ok)
+h x 3               4      5/5   BUG DETECTED (ok)
+ALL AS EXPECTED
