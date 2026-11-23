@@ -1,8 +1,3 @@
-"""
-test_variants.py — tests the 3 variants of Part 1.
-Run:  python python/test_variants.py                       (self-generated grid graph)
-      python python/test_variants.py data/nodes.csv data/edges.csv
-"""
 import random
 import sys
 from pathlib import Path
@@ -18,7 +13,6 @@ ROOT = Path(__file__).resolve().parent.parent   # repo root: python/test_variant
 SAMPLE_PAIR_TXT = ROOT / "data" / "sample_pair.txt"
 
 def brute_force_pareto(adj, ttime, s, d, limit=200000):
-    """Enumerate every simple path s->d (small graphs only) and keep the non-dominated set."""
     out, stack, seen = [], [(s, (s,), 0.0, 0.0)], 0
     while stack:
         u, path, L, T = stack.pop()
@@ -52,10 +46,8 @@ def main():
 
     # (b) uncertain h: gap between a fixed plan and the optimum when the noise is known
     s, d = nodes[0], nodes[-1]
-    try:                                   # real graph: use the instructor's sample pair
+    if len(sys.argv) >= 3:            # real graph: use the instructor's sample pair
         s, d = map(int, open(SAMPLE_PAIR_TXT).read().split())
-    except (OSError, ValueError):
-        pass
     res = uncertain_experiment(adj, coords, s, d, runs=20)
     for k, (mean_gap, max_gap) in res.items():
         print(f"(b) uncertain h, plan={k:6s}: gap vs optimal mean={mean_gap:.3f} min, max={max_gap:.3f} min (must be >= 0)")

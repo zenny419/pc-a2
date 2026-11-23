@@ -1,9 +1,3 @@
-"""
-astar_variants.py — Part 1, the special cases required by the assignment:
-  (a) dynamic h: speed changes over time (as in the instructor's notebook)
-  (b) uncertain h: speeds have random noise
-  (c) vector-valued f: optimise (length, time) simultaneously -> Pareto set
-"""
 import heapq
 import itertools
 import math
@@ -18,11 +12,6 @@ SPEEDS = [350, 350, 500, 500, 600, 600, 550, 500, 400, 300,
 
 # ---------------- (a) dynamic h ----------------
 def edge_time(length, t, speeds=SPEEDS):
-    """
-    Time (minutes) to traverse an edge of `length` metres when departing at time t.
-    Speed changes every minute -> integrate piecewise (guarantees FIFO: leaving earlier never arrives later).
-    The instructor's notebook only uses speeds[floor(t)] for the whole edge and raises IndexError when t >= 20.
-    """
     start, remaining = t, length
     while True:
         k = math.floor(t)
@@ -35,11 +24,6 @@ def edge_time(length, t, speeds=SPEEDS):
 
 
 def astar_time_dependent(adj, coords, s, d, t0=0.0, speeds=SPEEDS, use_h=True):
-    """
-    Cost = travel time to the destination (minutes) when departing at t0.
-    h(v) = straight-line distance / max(speeds)  -> always <= true time -> admissible.
-    use_h=False -> time-dependent Dijkstra (used as the reference answer).
-    """
     vmax = max(speeds)
     target = coords[d]
     h = (lambda v: haversine(coords[v], target) / vmax) if use_h else (lambda v: 0.0)
@@ -66,34 +50,43 @@ def astar_time_dependent(adj, coords, s, d, t0=0.0, speeds=SPEEDS, use_h=True):
 
 # ---------------- (b) uncertain h ----------------
 def noisy_speeds(rng, noise=0.2, speeds=SPEEDS):
-    """Each minute the speed varies by ±noise around the base value (simulates unpredictable traffic)."""
     return [sp * rng.uniform(1 - noise, 1 + noise) for sp in speeds]
+
+def edge_noise_levels(adj, noise, rng):
+    return {(u, v): rng.uniform(0, 2 * noise) for u in adj for v in adj[u]}
+
+
+def scaled_problem(adj, factor, fmax, speeds):
+    new_adj = {u: {v: L * fmax / factor[(u, v)] for v, L in nbrs.items()}
+               for u, nbrs in adj.items()}
+    return new_adj, [sp * fmax for sp in speeds]
 
 
 def uncertain_experiment(adj, coords, s, d, runs=30, noise=0.2, seed=0):
-    """
-    Compare 2 planning strategies when the real speeds have ±noise:
-      - "mean"  : plan with the base (average) speeds
-      - "robust": plan with the worst-case speeds (base x (1 - noise))
-    Each run: follow the plan under the real (noisy) speeds and compare with the optimal cost
-    had the real speeds been known in advance. Returns {strategy: (mean gap, max gap)}.
-    """
+    assert 0 <= noise < 0.5, "need 1 - 2*noise > 0"
     rng = random.Random(seed)
+    level = edge_noise_levels(adj, noise, rng)
+    fmax = 1 + 2 * noise                      
+    worst = {e: 1 - n for e, n in level.items()}
+    r_adj, r_speeds = scaled_problem(adj, worst, fmax,
+                                     [sp * (1 - noise) for sp in SPEEDS])
     plans = {
         "mean": astar_time_dependent(adj, coords, s, d)[1],
-        "robust": astar_time_dependent(adj, coords, s, d,
-                                       speeds=[sp * (1 - noise) for sp in SPEEDS])[1],
+        "robust": astar_time_dependent(r_adj, coords, s, d, speeds=r_speeds)[1],
     }
     if plans["mean"] is None:
-        return {k: (float("nan"), float("nan")) for k in plans}   # no path s -> d
+        return {k: (float("nan"), float("nan")) for k in plans}   
     gaps = {k: [] for k in plans}
     for _ in range(runs):
         sp = noisy_speeds(rng, noise)
-        best, _, _ = astar_time_dependent(adj, coords, s, d, speeds=sp)
+        real = {e: rng.uniform(1 - n, 1 + n) for e, n in level.items()}
+        o_adj, o_speeds = scaled_problem(adj, real, fmax, sp)
+        best, _, _ = astar_time_dependent(o_adj, coords, s, d, speeds=o_speeds)
         for k, plan in plans.items():
             t = 0.0
             for u, v in zip(plan, plan[1:]):
-                t += edge_time(adj[u][v], t, sp)
+                t += edge_time(o_adj[u][v], t, o_speeds)
+            assert t >= best - 1e-9, "oracle must be optimal"
             gaps[k].append(t - best)
     return {k: (sum(g) / runs, max(g)) for k, g in gaps.items()}
 
@@ -104,25 +97,20 @@ def dominates(a, b):
 
 
 def astar_pareto(adj, ttime, coords, s, d, vmax_mpm):
-    """
-    Multi-objective A* (NAMOA* idea): cost g = (length in m, time in minutes).
-    Each node keeps several non-dominated labels. Result: a SET of Pareto paths, not a single path.
-    h = (straight-line, straight-line / vmax) -> admissible in both components.
-    """
     target = coords[d]
     def h(v):
         x = haversine(coords[v], target)
         return (x, x / vmax_mpm)
-    labels = {s: [(0.0, 0.0)]}               # non-dominated labels seen so far at each node
+    labels = {s: [(0.0, 0.0)]}               
     ctr = itertools.count()
     pq = [(h(s), next(ctr), (0.0, 0.0), s, (s,))]
     sols = []
     while pq:
-        f, _, g, u, path = heapq.heappop(pq)  # the heap compares vectors lexicographically
+        f, _, g, u, path = heapq.heappop(pq)  
         if any(dominates(sg, f) or sg == f for sg, _ in sols):
-            continue                          # a better solution already exists -> prune
+            continue                          
         if g not in labels.get(u, []):
-            continue                          # this label has been discarded
+            continue                          
         if u == d:
             sols.append((g, list(path)))
             continue
