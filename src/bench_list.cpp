@@ -19,9 +19,11 @@ constexpr int KEY_RANGE = 1000;
 constexpr int INIT_SIZE = 500;
 constexpr int PCT_CONTAINS = 80;
 constexpr int PCT_ADD = 10;
+static volatile long g_sink = 0;
 
 struct alignas(64) PaddedCount {
     long value = 0;
+    long hits = 0;
 };
 
 template <class List>
@@ -42,16 +44,18 @@ double run(int num_threads, double seconds, unsigned seed) {
         std::uniform_int_distribution<int> key_dist(0, KEY_RANGE - 1);
         std::uniform_int_distribution<int> op_dist(0, 99);
         long done = 0;
+        long hits = 0;
         while (!go.load(std::memory_order_acquire)) cpu_relax();
         while (!stop.load(std::memory_order_relaxed)) {
             int k = key_dist(rng);
             int op = op_dist(rng);
-            if (op < PCT_CONTAINS) list.contains(k);
-            else if (op < PCT_CONTAINS + PCT_ADD) list.add(k);
-            else list.remove(k);
+            if (op < PCT_CONTAINS) hits += list.contains(k);
+            else if (op < PCT_CONTAINS + PCT_ADD) hits += list.add(k);
+            else hits += list.remove(k);
             ++done;
         }
         counts[id].value = done;
+        counts[id].hits = hits;
     };
 
     std::vector<std::thread> ts;
@@ -64,8 +68,9 @@ double run(int num_threads, double seconds, unsigned seed) {
     for (auto& t : ts) t.join();
     double secs = duration<double>(steady_clock::now() - start).count();
 
-    long total = 0;
-    for (auto& c : counts) total += c.value;
+    long total = 0, hit_sum = 0;
+    for (auto& c : counts) { total += c.value; hit_sum += c.hits; }
+    g_sink = hit_sum;
     return total / secs;
 }
 
