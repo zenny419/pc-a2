@@ -1,0 +1,5 @@
+# Personal study notes: pseudocode for each code file — keep locally, never push
+pseudocode/
+build/
+dist/
+cache/

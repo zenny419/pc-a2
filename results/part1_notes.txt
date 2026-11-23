@@ -1,0 +1,11 @@
+Graph: 32895 nodes, 75882 edges (radius 10 km around instructor's pair)
+Sample pair: 3700940837 -> 11346641691
+Pairs: 100  PASS: 100  FAIL: 0
+Avg expanded  Dijkstra: 15578   A*: 4939
+Avg time (ms) Dijkstra: 21.51   A*: 12.77
+Negative control (weight=3): 97 pairs with non-optimal cost -> test CAN detect bugs
+(a) dynamic h: 100/100 pairs match time-dependent Dijkstra
+(b) uncertain h, plan=mean  : gap vs optimal mean=0.000 min, max=0.000 min (must be >= 0)
+(b) uncertain h, plan=robust: gap vs optimal mean=0.000 min, max=0.000 min (must be >= 0)
+(c) vector f: 10/10 Pareto sets equal brute force
+24 threads (2x logical cores): coarse+ttas PASS at 2000 ops; fine+ttas TIMEOUT even at 2000 ops -> lock convoy (preempted holder blocks every thread behind it on the list)
