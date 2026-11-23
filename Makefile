@@ -1,6 +1,3 @@
-# Makefile for Parallel Computing - Assignment 2
-# Recipe lines start with '>' instead of TAB (see .RECIPEPREFIX),
-# so copy-pasting from a browser cannot break the file.
 .RECIPEPREFIX = >
 
 # ---- Paths: declare ROOT first, every other folder is built from ROOT ----
@@ -21,16 +18,19 @@ NPROC2 := $(shell echo $$(( 2 * $(NPROC) )))
 
 HEADERS := $(wildcard $(INC)/*.h)
 
-.PHONY: all astar test tsan dist clean
+.PHONY: all astar test tsan bench dist clean
 
 # Default target: build the list test
-all: $(BUILD)/test_list
+all: $(BUILD)/test_list $(BUILD)/bench_list
 
 $(BUILD):
 > mkdir -p $@
 
 # ---- Part 2: concurrent sorted list ----
 $(BUILD)/test_list: $(SRC)/test_list.cpp $(HEADERS) | $(BUILD)
+> $(CXX) $(CXXFLAGS) $< -o $@
+
+$(BUILD)/bench_list: $(SRC)/bench_list.cpp $(HEADERS) | $(BUILD)
 > $(CXX) $(CXXFLAGS) $< -o $@
 
 $(BUILD)/test_list_tsan: $(SRC)/test_list.cpp $(HEADERS) | $(BUILD)
@@ -83,6 +83,11 @@ dist:
 > @size=$$(stat -c %s $(ZIP)); \
 >   if [ $$size -gt $(LIMIT) ]; then echo "FAIL: zip is $$size bytes (> 20 MB)"; exit 1; \
 >   else echo "OK: zip is $$size bytes (< 20 MB)"; fi
+
+VARIANTS := coarse+ttas coarse+ttas_bo coarse+std fine+ttas fine+ttas_bo fine+std
+
+bench: $(BUILD)/bench_list
+> @for v in $(VARIANTS); do $(BUILD)/bench_list $$v $(NPROC) 1; done
 
 clean:
 > rm -rf $(BUILD) $(DIST)
