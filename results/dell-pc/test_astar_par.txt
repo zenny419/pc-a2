@@ -12,6 +12,6 @@ first-touch        12      1/50  wrong costs (info)
 h x 3               1     48/50  BUG DETECTED (ok)
 h x 3               2     47/50  BUG DETECTED (ok)
 h x 3               4     46/50  BUG DETECTED (ok)
-h x 3               8     47/50  BUG DETECTED (ok)
-h x 3              12     47/50  BUG DETECTED (ok)
+h x 3               8     46/50  BUG DETECTED (ok)
+h x 3              12     44/50  BUG DETECTED (ok)
 ALL AS EXPECTED

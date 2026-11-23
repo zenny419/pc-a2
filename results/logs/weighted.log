@@ -1,0 +1,7 @@
+weight,mean_excess_pct,mean_expanded
+1.0,0.000,4226
+1.2,0.443,2269
+1.5,2.879,1326
+2.0,6.402,1037
+3.0,10.676,823
+saved /home/hoangyenduong/pc-a2/results/weighted_astar.csv
