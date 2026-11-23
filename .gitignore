@@ -3,3 +3,4 @@ pseudocode/
 build/
 dist/
 cache/
+__pycache__/
