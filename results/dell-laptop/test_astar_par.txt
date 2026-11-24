@@ -1,14 +1,38 @@
-mode          threads     result status
-correct             1     50/50  PASS
-correct             2     50/50  PASS
-correct             4     50/50  PASS
-correct             8     50/50  PASS
-first-touch         1      0/50  no wrong cost (info)
-first-touch         2      0/50  no wrong cost (info)
-first-touch         4      0/50  no wrong cost (info)
-first-touch         8      1/50  wrong costs (info)
-h x 3               1     48/50  BUG DETECTED (ok)
-h x 3               2     47/50  BUG DETECTED (ok)
-h x 3               4     47/50  BUG DETECTED (ok)
-h x 3               8     44/50  BUG DETECTED (ok)
+mode         variant     threads     result status
+correct      list              1     50/50  PASS
+correct      list              2     50/50  PASS
+correct      list              4     50/50  PASS
+correct      list              8     50/50  PASS
+correct      heap              1     50/50  PASS
+correct      heap              2     50/50  PASS
+correct      heap              4     50/50  PASS
+correct      heap              8     50/50  PASS
+correct      list_pool         1     50/50  PASS
+correct      list_pool         2     50/50  PASS
+correct      list_pool         4     50/50  PASS
+correct      list_pool         8     50/50  PASS
+correct      heap_pool         1     50/50  PASS
+correct      heap_pool         2     50/50  PASS
+correct      heap_pool         4     50/50  PASS
+correct      heap_pool         8     50/50  PASS
+first-touch  list              1      0/50  no wrong cost (info)
+first-touch  list              2      0/50  no wrong cost (info)
+first-touch  list              4      0/50  no wrong cost (info)
+first-touch  list              8      0/50  no wrong cost (info)
+h x 3        list              1     48/50  BUG DETECTED (ok)
+h x 3        list              2     45/50  BUG DETECTED (ok)
+h x 3        list              4     46/50  BUG DETECTED (ok)
+h x 3        list              8     44/50  BUG DETECTED (ok)
+h x 3        heap              1     48/50  BUG DETECTED (ok)
+h x 3        heap              2     46/50  BUG DETECTED (ok)
+h x 3        heap              4     46/50  BUG DETECTED (ok)
+h x 3        heap              8     46/50  BUG DETECTED (ok)
+h x 3        list_pool         1     48/50  BUG DETECTED (ok)
+h x 3        list_pool         2     47/50  BUG DETECTED (ok)
+h x 3        list_pool         4     44/50  BUG DETECTED (ok)
+h x 3        list_pool         8     46/50  BUG DETECTED (ok)
+h x 3        heap_pool         1     48/50  BUG DETECTED (ok)
+h x 3        heap_pool         2     46/50  BUG DETECTED (ok)
+h x 3        heap_pool         4     47/50  BUG DETECTED (ok)
+h x 3        heap_pool         8     45/50  BUG DETECTED (ok)
 ALL AS EXPECTED

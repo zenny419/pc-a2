@@ -72,3 +72,107 @@ astar run 4 set random done (01:39:58)
 astar run 5 set teacher done (01:39:59)
 astar run 5 set random done (01:40:01)
 == done 2026-11-24 01:40:01
+== start 2026-11-24 20:03:22 machine=dell-laptop nproc=8 threads=[1 2 4 8 16 ] runs=5 secs=2 pairs=10 as_variants=[list:create heap:create list:pool heap:pool] batch_n=500
+== build
+make: Nothing to be done for 'all'.
+== sysinfo
+== correctness: list
+== test_list, 8 threads (= logical cores) ==
+/home/hoangyenduong/pc-a2/build/test_list 8
+[Frame 3 – Configuration] threads=8 ops/thread=20000 repeats=5
+  coarse+ttas        real     PASS                    5/5  correct
+  coarse+std         real     PASS                    5/5  correct
+  fine+ttas          real     PASS                    5/5  correct
+  fine+std           real     PASS                    5/5  correct
+  lazy+ttas          real     PASS                    5/5  correct
+  racy (control)     control  BUG DETECTED (ok)       0/5  correct   | first failure: return value != shadow, observed=2009, expected=2009
+ALL AS EXPECTED
+== test_list, 16 threads (2 x logical cores), 200 ops/thread ==
+/home/hoangyenduong/pc-a2/build/test_list 16 200 2
+[Frame 3 – Configuration] threads=16 ops/thread=200 repeats=2
+  coarse+ttas        real     PASS                    2/2  correct
+  coarse+std         real     PASS                    2/2  correct
+  fine+ttas          real     PASS                    2/2  correct
+  fine+std           real     PASS                    2/2  correct
+  lazy+ttas          real     PASS                    2/2  correct
+  racy (control)     control  BUG DETECTED (ok)       0/2  correct   | first failure: return value != shadow, observed=924, expected=931
+ALL AS EXPECTED
+== correctness: parallel A* (20:04:10)
+mode         variant     threads     result status
+correct      list              1     50/50  PASS
+correct      list              2     50/50  PASS
+correct      list              4     50/50  PASS
+correct      list              8     50/50  PASS
+correct      heap              1     50/50  PASS
+correct      heap              2     50/50  PASS
+correct      heap              4     50/50  PASS
+correct      heap              8     50/50  PASS
+correct      list_pool         1     50/50  PASS
+correct      list_pool         2     50/50  PASS
+correct      list_pool         4     50/50  PASS
+correct      list_pool         8     50/50  PASS
+correct      heap_pool         1     50/50  PASS
+correct      heap_pool         2     50/50  PASS
+correct      heap_pool         4     50/50  PASS
+correct      heap_pool         8     50/50  PASS
+first-touch  list              1      0/50  no wrong cost (info)
+first-touch  list              2      0/50  no wrong cost (info)
+first-touch  list              4      0/50  no wrong cost (info)
+first-touch  list              8      0/50  no wrong cost (info)
+h x 3        list              1     48/50  BUG DETECTED (ok)
+h x 3        list              2     45/50  BUG DETECTED (ok)
+h x 3        list              4     46/50  BUG DETECTED (ok)
+h x 3        list              8     44/50  BUG DETECTED (ok)
+h x 3        heap              1     48/50  BUG DETECTED (ok)
+h x 3        heap              2     46/50  BUG DETECTED (ok)
+h x 3        heap              4     46/50  BUG DETECTED (ok)
+h x 3        heap              8     46/50  BUG DETECTED (ok)
+h x 3        list_pool         1     48/50  BUG DETECTED (ok)
+h x 3        list_pool         2     47/50  BUG DETECTED (ok)
+h x 3        list_pool         4     44/50  BUG DETECTED (ok)
+h x 3        list_pool         8     46/50  BUG DETECTED (ok)
+h x 3        heap_pool         1     48/50  BUG DETECTED (ok)
+h x 3        heap_pool         2     46/50  BUG DETECTED (ok)
+h x 3        heap_pool         4     47/50  BUG DETECTED (ok)
+h x 3        heap_pool         8     45/50  BUG DETECTED (ok)
+ALL AS EXPECTED
+== tsan: parallel A* (20:04:14)
+TSAN astar: clean
+h x 3        heap_pool         2      5/5   BUG DETECTED (ok)
+h x 3        heap_pool         4      4/5   BUG DETECTED (ok)
+ALL AS EXPECTED
+== tsan: list (20:04:23)
+[Frame 3 – Configuration] threads=8 ops/thread=2000 repeats=2
+  coarse+ttas        real     PASS                    2/2  correct
+  coarse+std         real     PASS                    2/2  correct
+  fine+ttas          real     PASS                    2/2  correct
+  fine+std           real     PASS                    2/2  correct
+  lazy+ttas          real     PASS                    2/2  correct
+racy (control): skipped under ThreadSanitizer (intentional race)
+ALL AS EXPECTED
+TSAN: clean
+== bench_list (20:04:40)
+list run 1 done (20:06:01)
+list run 2 done (20:07:22)
+list run 3 done (20:08:43)
+list run 4 done (20:10:04)
+list run 5 done (20:11:24)
+== astar (20:11:24)
+astar run 1 set teacher done (20:11:26)
+astar run 1 set random done (20:11:30)
+astar run 2 set teacher done (20:11:32)
+astar run 2 set random done (20:11:35)
+astar run 3 set teacher done (20:11:36)
+astar run 3 set random done (20:11:40)
+astar run 4 set teacher done (20:11:42)
+astar run 4 set random done (20:11:44)
+astar run 5 set teacher done (20:11:46)
+astar run 5 set random done (20:11:50)
+== astar_batch (20:11:50)
+batch run 1 done (20:11:53)
+batch run 2 done (20:11:56)
+batch run 3 done (20:12:00)
+batch run 4 done (20:12:03)
+batch run 5 done (20:12:06)
+== spawn_bench (20:12:06)
+== done 2026-11-24 20:12:20

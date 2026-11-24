@@ -6,7 +6,7 @@
   fine+ttas          real     PASS                    5/5  correct
   fine+std           real     PASS                    5/5  correct
   lazy+ttas          real     PASS                    5/5  correct
-  racy (control)     control  BUG DETECTED (ok)       0/5  correct   | first failure: return value != shadow, observed=2010, expected=2009
+  racy (control)     control  BUG DETECTED (ok)       0/5  correct   | first failure: return value != shadow, observed=2009, expected=2009
 ALL AS EXPECTED
 == test_list, 16 threads (2 x logical cores), 200 ops/thread ==
 /home/hoangyenduong/pc-a2/build/test_list 16 200 2
@@ -16,5 +16,5 @@ ALL AS EXPECTED
   fine+ttas          real     PASS                    2/2  correct
   fine+std           real     PASS                    2/2  correct
   lazy+ttas          real     PASS                    2/2  correct
-  racy (control)     control  BUG DETECTED (ok)       0/2  correct   | first failure: return value != shadow, observed=913, expected=931
+  racy (control)     control  BUG DETECTED (ok)       0/2  correct   | first failure: return value != shadow, observed=924, expected=931
 ALL AS EXPECTED
