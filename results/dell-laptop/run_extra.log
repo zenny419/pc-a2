@@ -1,0 +1,77 @@
+== start 2026-11-25 00:16:06 machine=dell-laptop nproc=8 threads=[1 2 4 8 16 ] runs=5 secs=2 pairs=10
+g++ -std=c++20 -O2 -Wall -Wextra -pthread -I/home/hoangyenduong/pc-a2/include /home/hoangyenduong/pc-a2/src/test_list.cpp -o /home/hoangyenduong/pc-a2/build/test_list
+g++ -std=c++20 -O2 -Wall -Wextra -pthread -I/home/hoangyenduong/pc-a2/include /home/hoangyenduong/pc-a2/src/bench_list.cpp -o /home/hoangyenduong/pc-a2/build/bench_list
+g++ -std=c++20 -O2 -Wall -Wextra -pthread -I/home/hoangyenduong/pc-a2/include /home/hoangyenduong/pc-a2/src/astar_seq.cpp -o /home/hoangyenduong/pc-a2/build/astar_seq
+g++ -std=c++20 -O2 -Wall -Wextra -pthread -I/home/hoangyenduong/pc-a2/include /home/hoangyenduong/pc-a2/src/astar_par.cpp -o /home/hoangyenduong/pc-a2/build/astar_par
+g++ -std=c++20 -O2 -Wall -Wextra -pthread -I/home/hoangyenduong/pc-a2/include /home/hoangyenduong/pc-a2/src/test_astar_par.cpp -o /home/hoangyenduong/pc-a2/build/test_astar_par
+g++ -std=c++20 -O2 -Wall -Wextra -pthread -I/home/hoangyenduong/pc-a2/include /home/hoangyenduong/pc-a2/src/astar_batch.cpp -o /home/hoangyenduong/pc-a2/build/astar_batch
+== test_astar_par (00:16:19)
+mode         variant     threads     result status
+correct      list              1     50/50  PASS
+correct      list              2     50/50  PASS
+correct      list              4     50/50  PASS
+correct      list              8     50/50  PASS
+correct      heap              1     50/50  PASS
+correct      heap              2     50/50  PASS
+correct      heap              4     50/50  PASS
+correct      heap              8     50/50  PASS
+correct      list_pool         1     50/50  PASS
+correct      list_pool         2     50/50  PASS
+correct      list_pool         4     50/50  PASS
+correct      list_pool         8     50/50  PASS
+correct      heap_pool         1     50/50  PASS
+correct      heap_pool         2     50/50  PASS
+correct      heap_pool         4     50/50  PASS
+correct      heap_pool         8     50/50  PASS
+correct      lazy              1     50/50  PASS
+correct      lazy              2     50/50  PASS
+correct      lazy              4     50/50  PASS
+correct      lazy              8     50/50  PASS
+correct      lazy_pool         1     50/50  PASS
+correct      lazy_pool         2     50/50  PASS
+correct      lazy_pool         4     50/50  PASS
+correct      lazy_pool         8     50/50  PASS
+first-touch  list              1      0/50  no wrong cost (info)
+first-touch  list              2      0/50  no wrong cost (info)
+first-touch  list              4      0/50  no wrong cost (info)
+first-touch  list              8      1/50  wrong costs (info)
+h x 3        list              1     48/50  BUG DETECTED (ok)
+h x 3        list              2     46/50  BUG DETECTED (ok)
+h x 3        list              4     48/50  BUG DETECTED (ok)
+h x 3        list              8     44/50  BUG DETECTED (ok)
+h x 3        heap              1     48/50  BUG DETECTED (ok)
+h x 3        heap              2     47/50  BUG DETECTED (ok)
+h x 3        heap              4     47/50  BUG DETECTED (ok)
+h x 3        heap              8     47/50  BUG DETECTED (ok)
+h x 3        list_pool         1     48/50  BUG DETECTED (ok)
+h x 3        list_pool         2     48/50  BUG DETECTED (ok)
+h x 3        list_pool         4     46/50  BUG DETECTED (ok)
+h x 3        list_pool         8     44/50  BUG DETECTED (ok)
+h x 3        heap_pool         1     48/50  BUG DETECTED (ok)
+h x 3        heap_pool         2     47/50  BUG DETECTED (ok)
+h x 3        heap_pool         4     46/50  BUG DETECTED (ok)
+h x 3        heap_pool         8     47/50  BUG DETECTED (ok)
+h x 3        lazy              1     48/50  BUG DETECTED (ok)
+h x 3        lazy              2     48/50  BUG DETECTED (ok)
+h x 3        lazy              4     47/50  BUG DETECTED (ok)
+h x 3        lazy              8     45/50  BUG DETECTED (ok)
+h x 3        lazy_pool         1     48/50  BUG DETECTED (ok)
+h x 3        lazy_pool         2     46/50  BUG DETECTED (ok)
+h x 3        lazy_pool         4     47/50  BUG DETECTED (ok)
+h x 3        lazy_pool         8     42/50  BUG DETECTED (ok)
+ALL AS EXPECTED
+ALL AS EXPECTED
+TSAN: clean
+== bench_list pq (00:16:39)
+list pq run 1 done (00:17:32)
+list pq run 2 done (00:18:24)
+list pq run 3 done (00:19:16)
+list pq run 4 done (00:20:07)
+list pq run 5 done (00:20:59)
+== astar extra (00:20:59)
+astar extra run 1 done (00:21:05)
+astar extra run 2 done (00:21:16)
+astar extra run 3 done (00:21:24)
+astar extra run 4 done (00:21:31)
+astar extra run 5 done (00:21:44)
+== done 2026-11-25 00:21:44
