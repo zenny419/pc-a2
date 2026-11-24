@@ -9,12 +9,14 @@ OUT="$ROOT/results/$MACHINE"
 RUNS="${RUNS:-5}"
 SECS="${SECS:-2}"
 NPAIRS="${NPAIRS:-10}"
-NP="$(nproc)"
+NP="$(nproc 2>/dev/null || sysctl -n hw.ncpu)"
 THREADS="${THREADS:-1 2 4 8 $NP $((2 * NP))}"
 TLIST="$(echo $THREADS | tr ' ' '\n' | sort -n | uniq | tr '\n' ' ')"
 VARIANTS="${VARIANTS:-coarse+ttas coarse+ttas_bo coarse+std fine+ttas fine+ttas_bo fine+std lazy+ttas lazy+ttas_bo}"
 AS_TIMEOUT="${AS_TIMEOUT:-1800}"
 CXXF="-std=c++20 -O2 -Wall -Wextra -I$ROOT/include -pthread"
+if command -v timeout >/dev/null 2>&1; then TO=timeout; elif command -v gtimeout >/dev/null 2>&1; then TO=gtimeout; else TO=""; fi
+run_to() { if [ -n "$TO" ]; then "$TO" "$@"; else shift; "$@"; fi; }
 
 mkdir -p "$OUT" "$BUILD"
 cd "$ROOT"
@@ -36,9 +38,9 @@ echo "== sysinfo"
 {
     date '+%F %T'
     uname -a
-    lscpu
+    lscpu 2>/dev/null || sysctl hw.model hw.ncpu hw.physicalcpu hw.perflevel0.physicalcpu hw.perflevel1.physicalcpu hw.memsize machdep.cpu.brand_string
     echo "nproc: $NP"
-    free -h
+    free -h 2>/dev/null || sw_vers
     g++ --version | head -n 1
 } > "$OUT/sysinfo.txt"
 
@@ -62,7 +64,7 @@ echo "variant,threads,run,ops_per_sec" > "$OUT/list.csv"
 for run in $(seq 1 "$RUNS"); do
     for t in $TLIST; do
         for v in $VARIANTS; do
-            out="$(timeout $((SECS * 10 + 60)) ./build/bench_list "$v" "$t" "$SECS" "$run")"
+            out="$(run_to $((SECS * 10 + 60)) ./build/bench_list "$v" "$t" "$SECS" "$run")"
             rc=$?
             if [ $rc -eq 0 ]; then
                 echo "$out" | grep -v '^variant' >> "$OUT/list.csv"
@@ -81,7 +83,7 @@ for run in $(seq 1 "$RUNS"); do
     for set in teacher random; do
         if [ "$set" = teacher ]; then args="teacher 0"; else args="$NPAIRS 42"; fi
         for t in 0 $TLIST; do
-            out="$(timeout "$AS_TIMEOUT" ./build/astar_par "$DATA/nodes.csv" "$DATA/edges.csv" $args "$t" "$run")"
+            out="$(run_to "$AS_TIMEOUT" ./build/astar_par "$DATA/nodes.csv" "$DATA/edges.csv" $args "$t" "$run")"
             rc=$?
             if [ $rc -eq 0 ]; then
                 echo "$out" | tail -n +2 >> "$OUT/astar.csv"

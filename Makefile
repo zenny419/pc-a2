@@ -10,7 +10,7 @@ CXX       ?= g++
 CXXFLAGS  := -std=c++20 -O2 -Wall -Wextra -pthread -I$(INC)
 TSANFLAGS := -std=c++20 -O1 -g -fsanitize=thread -pthread -I$(INC)
 
-NPROC  := $(shell nproc)
+NPROC  := $(shell nproc 2>/dev/null || sysctl -n hw.ncpu)
 NPROC2 := $(shell echo $$(( 2 * $(NPROC) )))
 
 HEADERS := $(wildcard $(INC)/*.h)
