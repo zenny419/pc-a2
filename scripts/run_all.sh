@@ -14,6 +14,9 @@ THREADS="${THREADS:-1 2 4 8 $NP $((2 * NP))}"
 TLIST="$(echo $THREADS | tr ' ' '\n' | sort -n | uniq | tr '\n' ' ')"
 VARIANTS="${VARIANTS:-coarse+ttas coarse+ttas_bo coarse+std fine+ttas fine+ttas_bo fine+std lazy+ttas lazy+ttas_bo}"
 AS_TIMEOUT="${AS_TIMEOUT:-1800}"
+AS_VARIANTS="${AS_VARIANTS:-list:create heap:create list:pool heap:pool}"
+BATCH_N="${BATCH_N:-500}"
+SPAWN_REPS="${SPAWN_REPS:-1000}"
 CXXF="-std=c++20 -O2 -Wall -Wextra -I$ROOT/include -pthread"
 if command -v timeout >/dev/null 2>&1; then TO=timeout; elif command -v gtimeout >/dev/null 2>&1; then TO=gtimeout; else TO=""; fi
 run_to() { if [ -n "$TO" ]; then "$TO" "$@"; else shift; "$@"; fi; }
@@ -22,7 +25,7 @@ mkdir -p "$OUT" "$BUILD"
 cd "$ROOT"
 exec > >(tee -a "$OUT/run_all.log") 2>&1
 
-echo "== start $(date '+%F %T') machine=$MACHINE nproc=$NP threads=[$TLIST] runs=$RUNS secs=$SECS pairs=$NPAIRS"
+echo "== start $(date '+%F %T') machine=$MACHINE nproc=$NP threads=[$TLIST] runs=$RUNS secs=$SECS pairs=$NPAIRS as_variants=[$AS_VARIANTS] batch_n=$BATCH_N"
 
 while pgrep -f exp_pareto.py > /dev/null; do
     echo "waiting for exp_pareto.py to finish ($(date +%T))"
@@ -82,17 +85,44 @@ echo "variant,threads,run,src,dst,cost_m,expanded,stale_pops,pruned,list_len_avg
 for run in $(seq 1 "$RUNS"); do
     for set in teacher random; do
         if [ "$set" = teacher ]; then args="teacher 0"; else args="$NPAIRS 42"; fi
-        for t in 0 $TLIST; do
-            out="$(run_to "$AS_TIMEOUT" ./build/astar_par "$DATA/nodes.csv" "$DATA/edges.csv" $args "$t" "$run")"
-            rc=$?
-            if [ $rc -eq 0 ]; then
+        out="$(run_to "$AS_TIMEOUT" ./build/astar_par "$DATA/nodes.csv" "$DATA/edges.csv" $args 0 "$run")"
+        rc=$?
+        echo "$out" | tail -n +2 >> "$OUT/astar.csv"
+        [ $rc -eq 0 ] || echo "astar $set seq run=$run: rc=$rc (124 = timeout after ${AS_TIMEOUT}s)"
+        for t in $TLIST; do
+            for av in $AS_VARIANTS; do
+                open="${av%%:*}"
+                mode="${av##*:}"
+                out="$(run_to "$AS_TIMEOUT" ./build/astar_par "$DATA/nodes.csv" "$DATA/edges.csv" $args "$t" "$run" "$open" "$mode")"
+                rc=$?
                 echo "$out" | tail -n +2 >> "$OUT/astar.csv"
-            else
-                echo "$out" | tail -n +2 >> "$OUT/astar.csv"
-                echo "astar $set threads=$t run=$run: rc=$rc (124 = timeout after ${AS_TIMEOUT}s)"
-            fi
+                [ $rc -eq 0 ] || echo "astar $set $av threads=$t run=$run: rc=$rc (124 = timeout after ${AS_TIMEOUT}s)"
+            done
         done
         echo "astar run $run set $set done ($(date +%T))"
+    done
+done
+
+echo "== astar_batch ($(date +%T))"
+echo "variant,threads,run,n_queries,ms_total,qps,cost_match" > "$OUT/batch.csv"
+for run in $(seq 1 "$RUNS"); do
+    for t in 0 $TLIST; do
+        out="$(run_to "$AS_TIMEOUT" ./build/astar_batch "$DATA/nodes.csv" "$DATA/edges.csv" "$BATCH_N" 42 "$t" "$run")"
+        rc=$?
+        echo "$out" | tail -n +2 >> "$OUT/batch.csv"
+        [ $rc -eq 0 ] || echo "astar_batch threads=$t run=$run: rc=$rc (2 = cost mismatch, 124 = timeout)"
+    done
+    echo "batch run $run done ($(date +%T))"
+done
+
+echo "== spawn_bench ($(date +%T))"
+echo "variant,threads,run,reps,us_median" > "$OUT/spawn.csv"
+for run in $(seq 1 "$RUNS"); do
+    for t in $TLIST; do
+        out="$(run_to 600 ./build/spawn_bench "$t" "$SPAWN_REPS" "$run")"
+        rc=$?
+        echo "$out" | tail -n +2 >> "$OUT/spawn.csv"
+        [ $rc -eq 0 ] || echo "spawn_bench threads=$t run=$run: rc=$rc"
     done
 done
 

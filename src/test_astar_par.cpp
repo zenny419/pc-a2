@@ -21,6 +21,39 @@ static bool path_ok(const Graph& g, int s, int d, const ParResult& r) {
     return same_cost(sum, r.cost);
 }
 
+struct Variant {
+    const char* name;
+    OpenKind kind;
+    bool pool;
+};
+
+static const Variant VARIANTS[] = {
+    {"list", OpenKind::List, false},
+    {"heap", OpenKind::Heap, false},
+    {"list_pool", OpenKind::List, true},
+    {"heap_pool", OpenKind::Heap, true},
+};
+
+template <class Open>
+static std::vector<ParResult> solve_pool(const Graph& g, const std::vector<std::pair<int, int>>& pairs, int t,
+                                         double h_scale) {
+    ParEngine<Open> eng(g, t, StopRule::Correct, h_scale);
+    std::vector<ParResult> out;
+    for (auto [s, d] : pairs) out.push_back(eng.solve(s, d));
+    return out;
+}
+
+static std::vector<ParResult> solve_all(const Graph& g, const std::vector<std::pair<int, int>>& pairs, int t,
+                                        const Variant& v, double h_scale) {
+    if (v.pool) {
+        if (v.kind == OpenKind::Heap) return solve_pool<OpenHeap>(g, pairs, t, h_scale);
+        return solve_pool<FineList<ParKey, lock_ttas>>(g, pairs, t, h_scale);
+    }
+    std::vector<ParResult> out;
+    for (auto [s, d] : pairs) out.push_back(astar_par(g, s, d, t, StopRule::Correct, h_scale, v.kind));
+    return out;
+}
+
 int main(int argc, char** argv) {
     if (argc < 3) {
         std::fprintf(stderr, "usage: %s nodes.csv edges.csv [pairs=50] [seed=7] [max_threads=8]\n", argv[0]);
@@ -40,19 +73,24 @@ int main(int argc, char** argv) {
     if (tlist.back() != max_t) tlist.push_back(max_t);
 
     bool all_ok = true;
-    std::printf("%-12s %8s %10s %s\n", "mode", "threads", "result", "status");
-    for (int t : tlist) {
-        int good = 0;
-        for (size_t i = 0; i < pairs.size(); ++i) {
-            auto [s, d] = pairs[i];
-            ParResult r = astar_par(g, s, d, t);
-            if (same_cost(r.cost, ref[i]) && path_ok(g, s, d, r)) ++good;
-            else std::printf("  mismatch threads=%d pair=%zu par=%.3f dijkstra=%.3f\n", t, i, r.cost, ref[i]);
+    std::printf("%-12s %-10s %8s %10s %s\n", "mode", "variant", "threads", "result", "status");
+    for (const Variant& v : VARIANTS) {
+        for (int t : tlist) {
+            auto res = solve_all(g, pairs, t, v, 1.0);
+            int good = 0;
+            for (size_t i = 0; i < pairs.size(); ++i) {
+                auto [s, d] = pairs[i];
+                if (same_cost(res[i].cost, ref[i]) && path_ok(g, s, d, res[i])) ++good;
+                else
+                    std::printf("  mismatch variant=%s threads=%d pair=%zu par=%.3f dijkstra=%.3f\n", v.name, t, i,
+                                res[i].cost, ref[i]);
+            }
+            bool ok = good == (int)pairs.size();
+            all_ok = all_ok && ok;
+            std::printf("%-12s %-10s %8d %6d/%-3zu %s\n", "correct", v.name, t, good, pairs.size(),
+                        ok ? "PASS" : "FAIL");
+            std::fflush(stdout);
         }
-        bool ok = good == (int)pairs.size();
-        all_ok = all_ok && ok;
-        std::printf("%-12s %8d %6d/%-3zu %s\n", "correct", t, good, pairs.size(), ok ? "PASS" : "FAIL");
-        std::fflush(stdout);
     }
     for (int t : tlist) {
         int wrong = 0;
@@ -61,22 +99,22 @@ int main(int argc, char** argv) {
             ParResult r = astar_par(g, s, d, t, StopRule::FirstTouch);
             if (!same_cost(r.cost, ref[i])) ++wrong;
         }
-        std::printf("%-12s %8d %6d/%-3zu %s\n", "first-touch", t, wrong, pairs.size(),
+        std::printf("%-12s %-10s %8d %6d/%-3zu %s\n", "first-touch", "list", t, wrong, pairs.size(),
                     wrong > 0 ? "wrong costs (info)" : "no wrong cost (info)");
         std::fflush(stdout);
     }
-    for (int t : tlist) {
-        int wrong = 0;
-        for (size_t i = 0; i < pairs.size(); ++i) {
-            auto [s, d] = pairs[i];
-            ParResult r = astar_par(g, s, d, t, StopRule::Correct, 3.0);
-            if (!same_cost(r.cost, ref[i])) ++wrong;
+    for (const Variant& v : VARIANTS) {
+        for (int t : tlist) {
+            auto res = solve_all(g, pairs, t, v, 3.0);
+            int wrong = 0;
+            for (size_t i = 0; i < pairs.size(); ++i)
+                if (!same_cost(res[i].cost, ref[i])) ++wrong;
+            bool detected = wrong > 0;
+            all_ok = all_ok && detected;
+            std::printf("%-12s %-10s %8d %6d/%-3zu %s\n", "h x 3", v.name, t, wrong, pairs.size(),
+                        detected ? "BUG DETECTED (ok)" : "NOT DETECTED (test too weak)");
+            std::fflush(stdout);
         }
-        bool detected = wrong > 0;
-        all_ok = all_ok && detected;
-        std::printf("%-12s %8d %6d/%-3zu %s\n", "h x 3", t, wrong, pairs.size(),
-                    detected ? "BUG DETECTED (ok)" : "NOT DETECTED (test too weak)");
-        std::fflush(stdout);
     }
     std::printf("%s\n", all_ok ? "ALL AS EXPECTED" : "UNEXPECTED RESULT");
     return all_ok ? 0 : 1;

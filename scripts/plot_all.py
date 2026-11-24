@@ -122,6 +122,95 @@ def summarize_astar(machine_dir, nproc):
     plt.close(fig)
 
 
+def summarize_variants(machine_dir, nproc):
+    df = pd.read_csv(machine_dir / "astar.csv")
+    if df["variant"].nunique() <= 2:
+        return
+    df["pair"] = df["src"].astype(str) + "-" + df["dst"].astype(str)
+    per = df.groupby(["variant", "threads", "pair"])["ms"].median().reset_index()
+    agg = per.groupby(["variant", "threads"])["ms"].agg(["median", "min", "max"]).reset_index()
+    agg.to_csv(machine_dir / "astar_variants_summary.csv", index=False)
+    seq_ms = agg.loc[agg["variant"] == "seq", "median"].iloc[0]
+    print("\nastar variants: median ms per query (median over pairs)")
+    print(agg[agg["variant"] != "seq"].pivot(index="variant", columns="threads", values="median").round(3).to_string())
+    print(f"seq: {seq_ms:.3f} ms")
+
+    fig, ax = plt.subplots(figsize=(6.5, 4.2))
+    style = {"par": ("tab:red", "--", "o", "list, create"), "par_pool": ("tab:red", "-", "o", "list, pool"),
+             "par_heap": ("tab:blue", "--", "s", "heap+mutex, create"),
+             "par_heap_pool": ("tab:blue", "-", "s", "heap+mutex, pool")}
+    for v, (c, ls, mk, lab) in style.items():
+        g = agg[agg["variant"] == v].sort_values("threads")
+        if g.empty:
+            continue
+        ax.plot(g["threads"], g["median"], color=c, ls=ls, marker=mk, label=lab)
+    ax.axhline(seq_ms, color="black", lw=1.2, label="astar_seq")
+    ax.axvline(nproc, color="grey", ls=":", lw=1)
+    t = sorted(agg.loc[agg["variant"] != "seq", "threads"].unique())
+    ax.set_xscale("log", base=2)
+    ax.set_yscale("log")
+    ax.set_xticks(t)
+    ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+    ax.set_xlabel("threads")
+    ax.set_ylabel("time per query (ms, log)")
+    ax.set_title(f"Parallel A* variants ({machine_dir.name})")
+    ax.legend(fontsize=8)
+    ax.grid(alpha=0.3, which="both")
+    fig.tight_layout()
+    fig.savefig(machine_dir / "astar_variants.png", dpi=150)
+    plt.close(fig)
+
+
+def summarize_batch(machine_dir, nproc):
+    f = machine_dir / "batch.csv"
+    if not f.exists():
+        return
+    df = pd.read_csv(f)
+    base = df.loc[df["variant"] == "batch_seq", "qps"].median()
+    par = df[df["variant"] == "batch"].copy()
+    par["speedup"] = par["qps"] / base
+    s = par.groupby("threads").agg(qps_median=("qps", "median"), speedup_median=("speedup", "median"),
+                                   speedup_min=("speedup", "min"), speedup_max=("speedup", "max"),
+                                   cost_match_min=("cost_match", "min"), n_queries=("n_queries", "first")).reset_index()
+    s.to_csv(machine_dir / "batch_summary.csv", index=False)
+    print(f"\nastar_batch: batch_seq median {base:.1f} qps")
+    print(s.round(3).to_string(index=False))
+    print(f"all queries match the reference: {bool((s['cost_match_min'] == s['n_queries']).all())}")
+
+    fig, ax = plt.subplots(figsize=(6.5, 4.2))
+    ax.errorbar(s["threads"], s["speedup_median"],
+                yerr=[s["speedup_median"] - s["speedup_min"], s["speedup_max"] - s["speedup_median"]],
+                marker="o", capsize=3, label="qps(p) / qps(batch_seq)")
+    t = np.array(sorted(s["threads"]))
+    ax.plot(t, t, "k--", lw=1, label="ideal (y = p)")
+    ax.axhline(1, color="red", lw=1, label="break-even")
+    ax.axvline(nproc, color="grey", ls=":", lw=1)
+    ax.set_xscale("log", base=2)
+    ax.set_yscale("log", base=2)
+    ax.set_xticks(t)
+    ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+    ax.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+    ax.set_xlabel("threads p")
+    ax.set_ylabel("speedup (log2)")
+    ax.set_title(f"Parallelism across queries, {int(s['n_queries'].iloc[0])} queries ({machine_dir.name})")
+    ax.legend(fontsize=8)
+    ax.grid(alpha=0.3, which="both")
+    fig.tight_layout()
+    fig.savefig(machine_dir / "batch_speedup.png", dpi=150)
+    plt.close(fig)
+
+
+def summarize_spawn(machine_dir):
+    f = machine_dir / "spawn.csv"
+    if not f.exists():
+        return
+    df = pd.read_csv(f)
+    s = df.groupby(["variant", "threads"])["us_median"].median().reset_index()
+    s.to_csv(machine_dir / "spawn_summary.csv", index=False)
+    print("\nthread start cost (us, median of runs)")
+    print(s.pivot(index="variant", columns="threads", values="us_median").round(1).to_string())
+
+
 def plot_weighted():
     f = RESULTS / "weighted_astar.csv"
     if not f.exists():
@@ -171,6 +260,9 @@ def main():
                 nproc = int(line.split(":")[1])
     summarize_list(machine_dir, nproc)
     summarize_astar(machine_dir, nproc)
+    summarize_variants(machine_dir, nproc)
+    summarize_batch(machine_dir, nproc)
+    summarize_spawn(machine_dir)
     plot_weighted()
     plot_pareto()
     print("\nsaved:", ", ".join(p.name for p in sorted(machine_dir.glob("*.png"))),
