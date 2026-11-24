@@ -64,6 +64,7 @@ def dijkstra(adj, s, d):
     return math.inf, None, expanded
 
 
+# weight > 1: weighted A*, fewer expansions but path may not be optimal
 def astar(adj, coords, s, d, h=None, weight=1.0):
     if h is None:
         target = coords[d]

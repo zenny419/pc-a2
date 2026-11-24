@@ -19,6 +19,7 @@ constexpr int KEY_RANGE = 1000;
 constexpr int INIT_SIZE = 500;
 constexpr int PCT_CONTAINS = 80;
 constexpr int PCT_ADD = 10;
+// results are summed here, otherwise -O2 drops the list traversal
 static volatile long g_sink = 0;
 
 struct alignas(64) PaddedCount {

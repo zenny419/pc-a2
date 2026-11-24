@@ -135,6 +135,7 @@ private:
 
     void lower_best(double c) {
         double cur = best_.load();
+        // CAS loop: best only ever decreases, even with many threads
         while (c < cur && !best_.compare_exchange_weak(cur, c)) {
         }
     }
@@ -211,6 +212,7 @@ private:
     std::unique_ptr<Open> open_;
     int s_ = 0, d_ = 0;
     std::atomic<double> best_{0.0};
+    // open-list items + nodes being expanded; search is done when it reaches 0
     std::atomic<long> pending_{0};
     std::atomic<bool> stop_{false};
     std::atomic<long> expanded_{0}, stale_{0}, pruned_{0};
