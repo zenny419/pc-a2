@@ -16,7 +16,7 @@ Duong Hoang Yen. Report: `DHY_Parallel_Computing_Assignment_2.pdf`. Code: this a
 | 3 | Sequential + parallel A* in C++ | `include/graph.h`, `src/astar_seq.cpp`, `src/astar_par.cpp` | 4.1–4.3 |
 | 3 | Correctness | `src/test_astar_par.cpp` | 4.4 |
 | 3 | Performance and scalability, all versions, all machines | `src/astar_batch.cpp`, `src/spawn_bench.cpp`, `scripts/run_all.sh`, `scripts/plot_all.py`, `results/<machine>/` | 5.3–5.5, 5.7 |
-| 4 | Other optimizations (optional) | `src/astar_par.cpp` (pruning, heap, pool), `src/astar_batch.cpp`, `python/exp_weighted.py`, `python/exp_alt.py` | 5.6 |
+| 4 | Other optimizations (optional) | `src/astar_par.cpp` (pruning, heap, pool), `src/astar_batch.cpp`, `python/exp_weighted.py`, `python/exp_alt.py`, `python/exp_ch.py` | 5.6 |
 
 ## How to re-run all checks
 
@@ -26,6 +26,7 @@ make test_astar && make tsan_astar             # Part 3
 python python/test_astar.py data/nodes.csv data/edges.csv 100
 python python/test_variants.py data/nodes.csv data/edges.csv
 python python/exp_alt.py 50 42 4,8,16           # Part 4: ALT
+python python/exp_ch.py 50 42 50                # Part 4: contraction hierarchies
 ```
 Expected output: `ALL AS EXPECTED` for every C++ test, no `WARNING: ThreadSanitizer` line, `FAIL: 0` for the Python tests. `scripts/run_all.sh <machine>` repeats the C++ tests before every measurement run and stores the logs in `results/<machine>/`.
 
@@ -36,7 +37,7 @@ Expected output: `ALL AS EXPECTED` for every C++ test, no `WARNING: ThreadSaniti
 | Property | Optimal cost (scalar and time-dependent A*), exact Pareto set, and identical cost for the C++ `astar_seq`. |
 | Method | Cost compared with Dijkstra; Pareto set compared with brute-force enumeration. Negative control: inflated heuristic (×3) must give wrong costs. |
 | Configuration | Real graph (32,895 nodes): 100 random pairs (A*, time-dependent), 20 pairs (C++ vs Python); 40×40 grid (time-dependent); 5×5 grid, 10 cases (Pareto). |
-| Result | A* 100/100; control wrong on 97/100 (bug detected); time-dependent 100/100 on both graphs; Pareto 10/10; `astar_seq` 20/20 (max difference 0.0000 m); ALT (Part 4, 50 pairs, seed 42) 50/50 with 4, 8 and 16 landmarks, control ×3 wrong on 48–49/50. |
+| Result | A* 100/100; control wrong on 97/100 (bug detected); time-dependent 100/100 on both graphs; Pareto 10/10; `astar_seq` 20/20 (max difference 0.0000 m); ALT (Part 4, 50 pairs, seed 42) 50/50 with 4, 8 and 16 landmarks, control ×3 wrong on 48–49/50; contraction hierarchies (Part 4, same 50 pairs) 50/50, unpacked paths 50/50, control "stop at first meeting node" wrong on 17/50. |
 | Limitations | Random pairs do not cover all cases; brute force only on a tiny grid; the uncertain-cost model has no exact reference. |
 
 ## Part 2 — Concurrent sorted list (C++)
