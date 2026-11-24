@@ -1,20 +1,10 @@
 #pragma once
-// =====================================================================
-//  test_util.h — utilities SHARED by the 3 correctness-test programs
-//  (test_lock, test_barrier, test_counter).
-//
-//  [Report: Frame 2 – Test method]  Watchdog against hangs
-//      -> checks LIVENESS (no deadlock / no infinite hang).
-//  [Report: Frame 4 – Results]  Prints the PASS / FAIL result table.
-// =====================================================================
 #include <atomic>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <thread>
 
-// When built with ThreadSanitizer (make tsan) the negative controls are SKIPPED,
-// because they contain deliberate data races -> TSan warnings would clutter the output.
 #if defined(__SANITIZE_THREAD__)
 #  define UNDER_TSAN 1
 #elif defined(__has_feature)
@@ -26,14 +16,8 @@
 #  define UNDER_TSAN 0
 #endif
 
-// ---------------------------------------------------------------------
-//  [Frame 2] Watchdog: a helper thread acts as a timer. Before each
-//  test we call arm(name, seconds). If the test has not finished in time -> it is
-//  treated as a DEADLOCK/hang (liveness violation); we print a message and exit
-//  (threads that spin forever cannot be killed safely).
-// ---------------------------------------------------------------------
 class Watchdog {
-    std::atomic<long long>   deadline_ms{0};      // 0 = not armed
+    std::atomic<long long>   deadline_ms{0};
     std::atomic<const char*> label{""};
     std::atomic<bool>        stop{false};
     std::thread              th;
@@ -67,21 +51,13 @@ public:
     void disarm() { deadline_ms = 0; }
 };
 
-// Result of one test run: ok + "evidence" for the report.
 struct TestResult {
     bool ok = true;
-    long observed = 0;      // observed value (e.g. final counter)
-    long expected = 0;      // expected value
-    const char* why = "";   // reason for failure (if any)
+    long observed = 0;
+    long expected = 0;
+    const char* why = "";
 };
 
-// ---------------------------------------------------------------------
-//  [Frame 4] Print one row of the result table.
-//   - REAL implementation: must PASS in every repetition.
-//   - NEGATIVE CONTROL: the test must DETECT a bug
-//     (at least once) -> shows that the test can catch bugs.
-//  Returns true if this row "meets the expectation".
-// ---------------------------------------------------------------------
 inline bool print_row(const char* name, bool is_control, int pass, int repeats,
                       const TestResult& first_bad) {
     bool good;

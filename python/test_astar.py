@@ -12,7 +12,6 @@ from astar_core import astar, dijkstra, load_graph, path_length
 EPS = 1e-6
 
 def make_grid(n=40, seed=1):
-    """n x n grid graph around HCMC, bidirectional edges, length = real distance x (1..1.5)."""
     from astar_core import haversine
     rnd = random.Random(seed)
     coords = {i * n + j: (10.75 + i * 0.001, 106.65 + j * 0.001) for i in range(n) for j in range(n)}
@@ -21,7 +20,7 @@ def make_grid(n=40, seed=1):
         for j in range(n):
             u = i * n + j
             for di, dj in ((0, 1), (1, 0)):
-                if i + di < n and j + dj < n and rnd.random() > 0.1:   # drop 10% of edges
+                if i + di < n and j + dj < n and rnd.random() > 0.1:
                     v = (i + di) * n + (j + dj)
                     w = haversine(coords[u], coords[v]) * rnd.uniform(1.0, 1.5)
                     adj[u][v] = adj[v][u] = w
@@ -54,7 +53,6 @@ def main():
     print(f"Avg expanded  Dijkstra: {exp_d/pairs:.0f}   A*: {exp_a/pairs:.0f}")
     print(f"Avg time (ms) Dijkstra: {1000*t_d/pairs:.2f}   A*: {1000*t_a/pairs:.2f}")
 
-    # Negative control: h inflated x3 (not admissible) -> there MUST be pairs with a wrong cost
     bad = 0
     for _ in range(pairs):
         s, d = rnd.choice(nodes), rnd.choice(nodes)

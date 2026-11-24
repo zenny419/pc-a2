@@ -1,13 +1,3 @@
-// =====================================================================
-//  astar_seq.cpp — SEQUENTIAL A* in C++: the baseline for computing speedup.
-//  Speedup = time(astar_seq) / time(astar_par with p threads).
-//  Do NOT use astar_par with 1 thread as the baseline: it still pays the locking
-//  cost and the O(n) sorted-list insertion, so the speedup would look artificially good.
-//
-//  Run:  ./astar_seq data/nodes.csv data/edges.csv <pairs> <seed>
-//    -> prints CSV: src,dst,cost_m,expanded,ms
-//  With the same <pairs> and <seed>, astar_par and the tests use exactly these node pairs.
-// =====================================================================
 #include "graph.h"
 #include <chrono>
 #include <cstdio>
@@ -20,19 +10,18 @@
 
 struct Result { double cost; long expanded; std::vector<int> path; };
 
-// h_scale = 0 -> Dijkstra (used as the reference answer in tests)
 Result astar(const Graph& g, int s, int d, double h_scale = 1.0) {
     const double INF = std::numeric_limits<double>::infinity();
     std::vector<double> best(g.n(), INF);
     std::vector<int> prev(g.n(), -1);
     std::vector<char> closed(g.n(), 0);
-    using Item = std::pair<double, int>;                       // (f, node)
+    using Item = std::pair<double, int>;
     std::priority_queue<Item, std::vector<Item>, std::greater<Item>> open;
     best[s] = 0; open.push({h_scale * g.haversine(s, d), s});
     long expanded = 0;
     while (!open.empty()) {
         int u = open.top().second; open.pop();
-        if (closed[u]) continue;                               // stale entry -> skip
+        if (closed[u]) continue;
         if (u == d) {
             Result r{best[d], expanded, {}};
             for (int x = d; x != -1; x = prev[x]) r.path.push_back(x);

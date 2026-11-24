@@ -1,16 +1,4 @@
 #!/usr/bin/env python3
-# =====================================================================
-#  plot_results.py — figures + summary tables from results/<machine>/*.csv
-#  Collects the results of ALL machines (copy the results/<machine> folders of the
-#  Dell machines to the Mac first); each figure has one subplot per machine.
-#
-#  Install the library (once):  python3 -m pip install --user matplotlib
-#  Run:                         python3 scripts/plot_results.py
-#  Output:                      results/plots/*.png  and  results/summary_part*.csv
-#
-#  Each point = MEDIAN of the repetitions (REPS). TIMEOUT points are not drawn;
-#  they appear in the summary tables with the value "TIMEOUT".
-# =====================================================================
 import csv, glob, os, statistics
 from collections import defaultdict
 
@@ -23,10 +11,8 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "results")
 PLOTS = os.path.join(ROOT, "plots")
 os.makedirs(PLOTS, exist_ok=True)
 
-# Line style: OUR lock/barrier/counter = solid; library primitives = dashed
 LIBRARY = {"std", "pthread", "omp", "lock_std", "lock_pthread", "lock_omp"}
 
-# 13 strong, easily distinguishable colours (tab10 + 3 more); assigned by name order in each figure
 PALETTE = list(plt.get_cmap("tab10").colors) + ["#000000", "#b8860b", "#00008b"]
 
 
@@ -39,7 +25,6 @@ def load(pattern):
 
 
 def aggregate(rows, name_col, x_col, y_col, group_cols=()):
-    """-> {(machine, *group): {name: {x: median_y or None(timeout)}}}, hw per machine"""
     vals = defaultdict(list)
     hw = {}
     for r in rows:
@@ -115,7 +100,6 @@ def summary(agg, fname, name_label, group_label=None):
     print("  wrote", os.path.relpath(path, ROOT))
 
 
-# ---------------- Part 1 ----------------
 rows = load("part1_locks.csv")
 if rows:
     print("Part 1 – Mutex locks")
@@ -125,7 +109,6 @@ if rows:
              "Time (seconds, log)", f"part1_time_ow{ow}.png", group_filter=(ow,))
     summary(agg, "summary_part1_locks.csv", "lock", "outside_work")
 
-# ---------------- Part 2 ----------------
 rows = load("part2_barriers.csv")
 if rows:
     print("Part 2 – Barrier")
@@ -134,12 +117,10 @@ if rows:
          "Episodes / second (log)", "part2_episodes_per_sec.png")
     summary(agg, "summary_part2_barriers.csv", "barrier")
 
-# ---------------- Part 3 ----------------
 rows = load("part3_counters.csv")
 if rows:
     print("Part 3 – Counters")
     agg, hw = aggregate(rows, "counter", "threads", "seconds")
-    # Time per inc() (ns) -> comparable even when the total number of inc() differs
     agg_ns, _ = aggregate(
         [dict(r, ns_per_op=str(float(r["seconds"]) / int(r["total_ops"]) * 1e9
                                if float(r["seconds"]) > 0 else -1)) for r in rows],

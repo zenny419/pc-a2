@@ -8,8 +8,7 @@ from test_astar import make_grid
 
 EPS = 1e-6
 
-# ---------- Paths (all built from ROOT) ----------
-ROOT = Path(__file__).resolve().parent.parent   # repo root: python/test_variants.py -> ..
+ROOT = Path(__file__).resolve().parent.parent
 SAMPLE_PAIR_TXT = ROOT / "data" / "sample_pair.txt"
 
 def brute_force_pareto(adj, ttime, s, d, limit=200000):
@@ -34,7 +33,6 @@ def main():
         coords, adj = make_grid(40)
     nodes = list(adj)
 
-    # (a) dynamic h: A* must give the same time as time-dependent Dijkstra
     ok = 0; N = 100
     for _ in range(N):
         s, d = rnd.choice(nodes), rnd.choice(nodes)
@@ -44,18 +42,16 @@ def main():
         ok += abs(ca - cd) < EPS or (ca == cd)
     print(f"(a) dynamic h: {ok}/{N} pairs match time-dependent Dijkstra")
 
-    # (b) uncertain h: gap between a fixed plan and the optimum when the noise is known
     s, d = nodes[0], nodes[-1]
-    if len(sys.argv) >= 3:            # real graph: use the instructor's sample pair
+    if len(sys.argv) >= 3:
         s, d = map(int, open(SAMPLE_PAIR_TXT).read().split())
     res = uncertain_experiment(adj, coords, s, d, runs=20)
     for k, (mean_gap, max_gap) in res.items():
         print(f"(b) uncertain h, plan={k:6s}: gap vs optimal mean={mean_gap:.3f} min, max={max_gap:.3f} min (must be >= 0)")
 
-    # (c) vector f: compare the Pareto set with brute force on a small 5x5 grid
     c2, a2 = make_grid(5, seed=3)
     tt = {u: {v: w / rnd.choice([300, 500, 700]) for v, w in nb.items()} for u, nb in a2.items()}
-    for u in a2:                                   # same travel time in both directions
+    for u in a2:
         for v in a2[u]:
             tt[v][u] = tt[u][v]
     good = 0; M = 10; n2 = list(a2)

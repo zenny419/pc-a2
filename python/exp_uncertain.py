@@ -23,7 +23,7 @@ def main():
         if s == d:
             continue
         res = uncertain_experiment(adj, coords, s, d, runs=20, seed=len(rows))
-        if res["mean"][0] != res["mean"][0]:      # NaN: no path s -> d
+        if res["mean"][0] != res["mean"][0]:
             continue
         row = [s, d, *res["mean"], *res["robust"]]
         rows.append(row)

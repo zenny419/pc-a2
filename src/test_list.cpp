@@ -17,7 +17,7 @@ class RacyList {
         p = &head_; c = head_.next;
         while (!c->tail && c->key < k) { p = c; c = c->next; }
         m_.release();
-        std::this_thread::yield();                   // widen the race window
+        std::this_thread::yield();
     }
 public:
     bool add(long k) { Node *p, *c; find(k, p, c); m_.acquire();
@@ -33,13 +33,13 @@ TestResult run_once(int T, int ops, unsigned seed) {
     List list;
     std::vector<std::set<long>> shadow(T);
     std::vector<int> mismatch(T, 0);
-    const long RANGE = 512;                      // few keys -> high contention
+    const long RANGE = 512;
     std::vector<std::thread> th;
     for (int t = 0; t < T; ++t)
         th.emplace_back([&, t] {
             std::mt19937 rng(seed * 131 + t);
             for (int i = 0; i < ops; ++i) {
-                long k = (long)(rng() % RANGE) * T + t;   // a key owned by thread t
+                long k = (long)(rng() % RANGE) * T + t;
                 int op = rng() % 3;
                 bool got, exp;
                 if (op == 0)      { got = list.add(k);      exp = shadow[t].insert(k).second; }
@@ -90,10 +90,6 @@ int main(int argc, char** argv) {
     all &= test<FineList<long, lock_ttas>>("fine+ttas", false, T, ops, reps, wd);
     all &= test<FineList<long, lock_std>>("fine+std", false, T, ops, reps, wd);
     all &= test<LazyList<long, lock_ttas>>("lazy+ttas", false, T, ops, reps, wd);
-// #endif
-    // The racy list has an intentional data race (negative control).
-    // Under ThreadSanitizer it would always be reported, so skip it there;
-    // the normal build (make test) still runs it.
 #if !defined(__SANITIZE_THREAD__)
     all &= test<RacyList>("racy (control)", true, T, ops, reps, wd);
 #else

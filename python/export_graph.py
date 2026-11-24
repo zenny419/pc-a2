@@ -11,18 +11,15 @@ from pathlib import Path
 
 import osmnx as ox
 
-# ---------- Paths (all built from ROOT) ----------
-ROOT = Path(__file__).resolve().parent.parent   # repo root: python/export_graph.py -> ..
+ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 NODES_CSV = DATA_DIR / "nodes.csv"
 EDGES_CSV = DATA_DIR / "edges.csv"
 SAMPLE_PAIR_TXT = DATA_DIR / "sample_pair.txt"
 
-# The instructor's 2 sample points from the notebook (lat, lon)
 SRC = (10.768856, 106.725019)
 DST = (10.839613, 106.845798)
 
-# Midpoint + 10 km radius: large enough to contain both points and the detours around them
 CENTER = ((SRC[0] + DST[0]) / 2, (SRC[1] + DST[1]) / 2)
 DIST_M = 10_000
 
@@ -30,8 +27,8 @@ def main():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     print("Downloading OSM drive network ... (a few minutes)")
     G = ox.graph_from_point(CENTER, dist=DIST_M, network_type="drive")
-    G = ox.add_edge_speeds(G)          # speed_kph inferred from the road type
-    G = ox.add_edge_travel_times(G)    # travel_time (seconds)
+    G = ox.add_edge_speeds(G)
+    G = ox.add_edge_travel_times(G)
 
     s = ox.distance.nearest_nodes(G, X=SRC[1], Y=SRC[0])
     d = ox.distance.nearest_nodes(G, X=DST[1], Y=DST[0])

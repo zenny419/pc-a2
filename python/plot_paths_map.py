@@ -12,11 +12,10 @@ NODES_CSV = ROOT / "data" / "nodes.csv"
 EDGES_CSV = ROOT / "data" / "edges.csv"
 SAMPLE_PAIR_TXT = ROOT / "data" / "sample_pair.txt"
 OUT_HTML = ROOT / "results" / "paths_map.html"
-NOISE = 0.2          # same setting as uncertain_experiment
+NOISE = 0.2
 
 
 def robust_plan(adj, coords, s, d, noise=NOISE, seed=0):
-    # same steps and seed as uncertain_experiment -> same plan
     level = edge_noise_levels(adj, noise, random.Random(seed))
     worst = {e: 1 - n for e, n in level.items()}
     r_adj, r_speeds = scaled_problem(adj, worst, 1 + 2 * noise,
@@ -33,7 +32,6 @@ def main():
         "Robust plan (part b)": ("red", robust_plan(adj, coords, s, d)),
     }
 
-    # m = folium.Map(location=coords[s], zoom_start=14, tiles="CartoDB positron")
     m = folium.Map(location=coords[s], zoom_start=14, tiles=None)
     folium.TileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
                      attr="Tiles &copy; Esri", name="Esri streets").add_to(m)

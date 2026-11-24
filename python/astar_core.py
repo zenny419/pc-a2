@@ -8,9 +8,7 @@ import heapq
 import itertools
 import math
 
-# ---------- Graph loading ----------
 def load_graph(nodes_csv, edges_csv):
-    """Return (coords, adj): coords[id] = (lat, lon); adj[u] = {v: length}."""
     coords, adj = {}, {}
     with open(nodes_csv, newline="", encoding="utf-8") as f:
         for r in csv.DictReader(f):
@@ -20,14 +18,12 @@ def load_graph(nodes_csv, edges_csv):
     with open(edges_csv, newline="", encoding="utf-8") as f:
         for r in csv.DictReader(f):
             u, v, w = int(r["u"]), int(r["v"]), float(r["length"])
-            # Parallel edges (same u,v): keep the SHORTEST one (the HW_Q2 adjacency-matrix bug was summing them)
             if v not in adj[u] or w < adj[u][v]:
                 adj[u][v] = w
     return coords, adj
 
 
 def load_travel_time(edges_csv):
-    """ttime[u][v] = edge travel time (minutes), used by the vector f (length, time)."""
     tt = {}
     with open(edges_csv, newline="", encoding="utf-8") as f:
         for r in csv.DictReader(f):
@@ -37,11 +33,9 @@ def load_travel_time(edges_csv):
     return tt
 
 
-# ---------- Heuristic ----------
-R_EARTH = 6_371_000.0  # metres
+R_EARTH = 6_371_000.0
 
 def haversine(a, b):
-    """Straight-line (great-circle) distance in metres between 2 (lat, lon) points."""
     lat1, lon1 = map(math.radians, a)
     lat2, lon2 = map(math.radians, b)
     dlat, dlon = lat2 - lat1, lon2 - lon1
@@ -49,7 +43,6 @@ def haversine(a, b):
     return 2 * R_EARTH * math.asin(math.sqrt(h))
 
 
-# ---------- Dijkstra (idea taken from HW_Q2, used as the "reference answer") ----------
 def dijkstra(adj, s, d):
     dist, prev = {s: 0.0}, {s: None}
     done, ctr = set(), itertools.count()
@@ -71,28 +64,22 @@ def dijkstra(adj, s, d):
     return math.inf, None, expanded
 
 
-# ---------- A* (fixes the bugs in the slide 9-10 pseudocode) ----------
 def astar(adj, coords, s, d, h=None, weight=1.0):
-    """
-    h(v) -> estimated cost from v to d. Default: haversine (metres), admissible.
-    weight > 1 -> Weighted A* (faster, may be non-optimal) -> used for 'result quality'.
-    Returns (cost, path, number of expanded nodes).
-    """
     if h is None:
         target = coords[d]
         h = lambda v: haversine(coords[v], target)
     g = {s: 0.0}
     prev = {s: None}
     closed = set()
-    ctr = itertools.count()                     # tie-breaker when f values are equal
-    open_pq = [(weight * h(s), next(ctr), s)]   # (f, insertion order, node)
+    ctr = itertools.count()
+    open_pq = [(weight * h(s), next(ctr), s)]
     expanded = 0
     while open_pq:
-        f, _, u = heapq.heappop(open_pq)        # pop = take u OUT of the open set (the slide misses this step)
-        if u in closed:                         # stale entry (a better g already exists) -> skip
+        f, _, u = heapq.heappop(open_pq)
+        if u in closed:
             continue
         if u == d:
-            return g[u], _rebuild(prev, d), expanded   # return g (true cost), not f
+            return g[u], _rebuild(prev, d), expanded
         closed.add(u)
         expanded += 1
         for v, w in adj[u].items():
@@ -101,8 +88,8 @@ def astar(adj, coords, s, d, h=None, weight=1.0):
             ng = g[u] + w
             if ng < g.get(v, math.inf):
                 g[v], prev[v] = ng, u
-                heapq.heappush(open_pq, (ng + weight * h(v), next(ctr), v))  # f of the NEIGHBOUR
-    return math.inf, None, expanded             # no path (the slide does not handle this)
+                heapq.heappush(open_pq, (ng + weight * h(v), next(ctr), v))
+    return math.inf, None, expanded
 
 
 def _rebuild(prev, d):

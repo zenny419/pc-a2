@@ -24,7 +24,7 @@ def main():
     groups = defaultdict(list)
     for r in rows:
         v = float(r[a.value])
-        if v >= 0:                         # -1 = TIMEOUT (A1's bench_util.h) -> skip
+        if v >= 0:
             groups[tuple(r[k] for k in keys)].append(v)
 
     out = a.csv.rsplit(".", 1)[0] + "_summary.csv"

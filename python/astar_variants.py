@@ -5,18 +5,16 @@ import random
 
 from astar_core import _rebuild, haversine
 
-# Speed (metres/minute) for each minute, taken from the instructor's notebook. Wraps around at the end.
 SPEEDS = [350, 350, 500, 500, 600, 600, 550, 500, 400, 300,
           600, 550, 500, 400, 300, 600, 550, 500, 400, 300]
 
 
-# ---------------- (a) dynamic h ----------------
 def edge_time(length, t, speeds=SPEEDS):
     start, remaining = t, length
     while True:
         k = math.floor(t)
         sp = speeds[k % len(speeds)]
-        dt = (k + 1) - t                    # time left until the end of this minute
+        dt = (k + 1) - t
         if sp * dt >= remaining:
             return t + remaining / sp - start
         remaining -= sp * dt
@@ -27,7 +25,7 @@ def astar_time_dependent(adj, coords, s, d, t0=0.0, speeds=SPEEDS, use_h=True):
     vmax = max(speeds)
     target = coords[d]
     h = (lambda v: haversine(coords[v], target) / vmax) if use_h else (lambda v: 0.0)
-    arr = {s: t0}                            # arrival time at each node
+    arr = {s: t0}
     prev, closed, ctr = {s: None}, set(), itertools.count()
     pq = [(t0 + h(s), next(ctr), s)]
     expanded = 0
@@ -41,14 +39,13 @@ def astar_time_dependent(adj, coords, s, d, t0=0.0, speeds=SPEEDS, use_h=True):
         for v, length in adj[u].items():
             if v in closed:
                 continue
-            a = arr[u] + edge_time(length, arr[u], speeds)   # t is computed SEPARATELY for each neighbour
+            a = arr[u] + edge_time(length, arr[u], speeds)
             if a < arr.get(v, math.inf):
                 arr[v], prev[v] = a, u
                 heapq.heappush(pq, (a + h(v), next(ctr), v))
     return math.inf, None, expanded
 
 
-# ---------------- (b) uncertain h ----------------
 def noisy_speeds(rng, noise=0.2, speeds=SPEEDS):
     return [sp * rng.uniform(1 - noise, 1 + noise) for sp in speeds]
 
@@ -91,7 +88,6 @@ def uncertain_experiment(adj, coords, s, d, runs=30, noise=0.2, seed=0):
     return {k: (sum(g) / runs, max(g)) for k, g in gaps.items()}
 
 
-# ---------------- (c) vector-valued f ----------------
 def dominates(a, b):
     return all(x <= y for x, y in zip(a, b)) and a != b
 
