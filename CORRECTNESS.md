@@ -52,8 +52,8 @@ Expected output: `ALL AS EXPECTED` for every C++ test, no `WARNING: ThreadSaniti
 
 | | |
 |---|---|
-| Property | Returned cost equals the Dijkstra optimum; returned path is valid (starts at s, ends at d, existing edges, sums to the cost); no data race. Same for all four variants (sorted list / heap × threads per query / pool) and for `astar_batch`. |
+| Property | Returned cost equals the Dijkstra optimum; returned path is valid (starts at s, ends at d, existing edges, sums to the cost); no data race. Same for all six variants (sorted list / heap / lazy list × threads per query / pool) and for `astar_batch`. |
 | Method | `test_astar_par` against a C++ Dijkstra; ThreadSanitizer build (`make tsan_astar`). Negative control: heuristic ×3 must give wrong costs. Termination argued in report Section 4.2 (`pending` counter). |
-| Configuration | Real graph; 50 random pairs (seed 7); four variants at 1/2/4/8/12 threads. Benchmarks: 11 pairs × 5 runs, every variant and thread count; `astar_batch`: 500 pairs vs `batch_seq`. |
-| Result | 50/50 correct for every variant and thread count; control: 44–48 of 50 wrong (BUG DETECTED); TSan clean; all benchmark costs equal to `astar_seq`; `astar_batch` 500/500 equal to `batch_seq`. |
+| Configuration | Real graph; 50 random pairs (seed 7); six variants at 1/2/4/8/12 threads. Benchmarks: 11 pairs × 5 runs, every variant and thread count; `astar_batch`: 500 pairs vs `batch_seq`. |
+| Result | 50/50 correct for every variant and thread count; control: 42–49 of 50 wrong (BUG DETECTED); TSan clean; all benchmark costs equal to `astar_seq`; `astar_batch` 500/500 equal to `batch_seq`. |
 | Limitations | On a road network a wrong stopping rule rarely changes the cost, so the stopping rule is also supported by an argument (report Section 4.2), not only by tests. |
