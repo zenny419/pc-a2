@@ -32,6 +32,8 @@ static const Variant VARIANTS[] = {
     {"heap", OpenKind::Heap, false},
     {"list_pool", OpenKind::List, true},
     {"heap_pool", OpenKind::Heap, true},
+    {"lazy", OpenKind::Lazy, false},
+    {"lazy_pool", OpenKind::Lazy, true},
 };
 
 template <class Open>
@@ -47,6 +49,7 @@ static std::vector<ParResult> solve_all(const Graph& g, const std::vector<std::p
                                         const Variant& v, double h_scale) {
     if (v.pool) {
         if (v.kind == OpenKind::Heap) return solve_pool<OpenHeap>(g, pairs, t, h_scale);
+        if (v.kind == OpenKind::Lazy) return solve_pool<LazyList<ParKey, lock_ttas>>(g, pairs, t, h_scale);
         return solve_pool<FineList<ParKey, lock_ttas>>(g, pairs, t, h_scale);
     }
     std::vector<ParResult> out;

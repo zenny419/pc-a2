@@ -85,7 +85,7 @@ dist:
 > @test -f $(ROOT)/$(REPORT) || echo "WARNING: report $(REPORT) not found in $(ROOT)"
 > cd $(ROOT) && zip -r $(ZIP) Makefile include src python scripts results \
 >   $(notdir $(wildcard $(ROOT)/*.md)) $(wildcard $(REPORT)) \
->   -x "*__pycache__*" "data/*" "build/*"
+>   -x "*__pycache__*" "data/*" "build/*" "*.bak"
 > @size=$$(stat -c %s $(ZIP)); \
 >   if [ $$size -gt $(LIMIT) ]; then echo "FAIL: zip is $$size bytes (> 20 MB)"; exit 1; \
 >   else echo "OK: zip is $$size bytes (< 20 MB)"; fi

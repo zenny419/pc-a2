@@ -1,5 +1,6 @@
 #pragma once
 #include <atomic>
+#include <optional>
 
 template <class Key, class Lock>
 class LazyList {
@@ -89,6 +90,29 @@ public:
                 c->lock.release();
                 p->lock.release();
                 return ok;
+            }
+            c->lock.release();
+            p->lock.release();
+        }
+    }
+
+    std::optional<Key> remove_min() {
+        while (true) {
+            Node* p = &head_;
+            Node* c = p->next.load(std::memory_order_acquire);
+            p->lock.acquire();
+            c->lock.acquire();
+            if (validate(p, c)) {
+                std::optional<Key> out;
+                if (!c->tail) {
+                    out = c->key;
+                    c->marked.store(true, std::memory_order_release);
+                    p->next.store(c->next.load(std::memory_order_acquire), std::memory_order_release);
+                }
+                c->lock.release();
+                p->lock.release();
+                if (out) retire(c);
+                return out;
             }
             c->lock.release();
             p->lock.release();

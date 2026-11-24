@@ -19,6 +19,8 @@ constexpr int KEY_RANGE = 1000;
 constexpr int INIT_SIZE = 500;
 constexpr int PCT_CONTAINS = 80;
 constexpr int PCT_ADD = 10;
+constexpr int PQ_INIT = 200;
+constexpr int PQ_SPREAD = 2000;
 // results are summed here, otherwise -O2 drops the list traversal
 static volatile long g_sink = 0;
 
@@ -28,13 +30,13 @@ struct alignas(64) PaddedCount {
 };
 
 template <class List>
-double run(int num_threads, double seconds, unsigned seed) {
+double run(int num_threads, double seconds, unsigned seed, bool pq) {
     List list;
-    std::vector<int> keys(KEY_RANGE);
+    std::vector<int> keys(pq ? PQ_SPREAD : KEY_RANGE);
     std::iota(keys.begin(), keys.end(), 0);
     std::mt19937 init_rng(seed);
     std::shuffle(keys.begin(), keys.end(), init_rng);
-    for (int i = 0; i < INIT_SIZE; ++i) list.add(keys[i]);
+    for (int i = 0; i < (pq ? PQ_INIT : INIT_SIZE); ++i) list.add(keys[i]);
 
     std::atomic<bool> go{false};
     std::atomic<bool> stop{false};
@@ -46,7 +48,19 @@ double run(int num_threads, double seconds, unsigned seed) {
         std::uniform_int_distribution<int> op_dist(0, 99);
         long done = 0;
         long hits = 0;
+        std::uniform_int_distribution<int> off_dist(1, PQ_SPREAD);
+        int last = 0;
         while (!go.load(std::memory_order_acquire)) cpu_relax();
+        while (pq && !stop.load(std::memory_order_relaxed)) {
+            auto m = list.remove_min();
+            if (m) {
+                last = *m;
+                ++hits;
+            }
+            while (!list.add(last + off_dist(rng))) {
+            }
+            done += 2;
+        }
         while (!stop.load(std::memory_order_relaxed)) {
             int k = key_dist(rng);
             int op = op_dist(rng);
@@ -92,14 +106,15 @@ bool with_list_type(const std::string& name, F&& f) {
 }
 
 int main(int argc, char** argv) {
-    if (argc < 4 || argc > 5) {
-        std::fprintf(stderr, "Usage: %s <variant> <threads> <seconds> [run]\n", argv[0]);
+    if (argc < 4 || argc > 6) {
+        std::fprintf(stderr, "Usage: %s <variant> <threads> <seconds> [run] [lookup|pq]\n", argv[0]);
         return 1;
     }
     std::string name = argv[1];
     int threads = std::atoi(argv[2]);
     double seconds = std::atof(argv[3]);
-    int run_id = argc == 5 ? std::atoi(argv[4]) : 1;
+    int run_id = argc >= 5 ? std::atoi(argv[4]) : 1;
+    bool pq = argc == 6 && std::string(argv[5]) == "pq";
 
     char prefix[128];
     std::snprintf(prefix, sizeof prefix, "%s,%d,%d", name.c_str(), threads, run_id);
@@ -108,7 +123,7 @@ int main(int argc, char** argv) {
     double ops_per_sec = 0;
     bool ok = with_list_type(name, [&](auto tag) {
         using L = typename decltype(tag)::type;
-        ops_per_sec = run<L>(threads, seconds, 42u + run_id);
+        ops_per_sec = run<L>(threads, seconds, 42u + run_id, pq);
     });
     if (!ok) {
         std::fprintf(stderr, "Unknown variant: %s\n", name.c_str());

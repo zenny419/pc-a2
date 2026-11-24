@@ -2,6 +2,7 @@
 #include "astar_seq.cpp"
 #include "lock.h"
 #include "sorted_list.h"
+#include "lazy_list.h"
 #include <algorithm>
 #include <atomic>
 #include <condition_variable>
@@ -31,7 +32,7 @@ struct ParResult {
     ParStats st;
 };
 
-enum class OpenKind { List, Heap };
+enum class OpenKind { List, Heap, Lazy };
 
 class OpenHeap {
     std::priority_queue<ParKey, std::vector<ParKey>, std::greater<ParKey>> pq_;
@@ -232,6 +233,10 @@ ParResult astar_par(const Graph& g, int s, int d, int threads, StopRule rule = S
         ParEngine<OpenHeap> eng(g, threads, rule, h_scale);
         return eng.solve(s, d);
     }
+    if (kind == OpenKind::Lazy) {
+        ParEngine<LazyList<ParKey, lock_ttas>> eng(g, threads, rule, h_scale);
+        return eng.solve(s, d);
+    }
     ParEngine<FineList<ParKey, lock_ttas>> eng(g, threads, rule, h_scale);
     return eng.solve(s, d);
 }
@@ -276,7 +281,7 @@ static void run_pool(const Graph& g, const std::vector<std::pair<int, int>>& pai
 int main(int argc, char** argv) {
     if (argc < 6) {
         std::fprintf(stderr,
-                     "usage: %s nodes.csv edges.csv <pairs|teacher> <seed> <threads> [run] [list|heap] [create|pool]\n",
+                     "usage: %s nodes.csv edges.csv <pairs|teacher> <seed> <threads> [run] [list|heap|lazy] [create|pool]\n",
                      argv[0]);
         std::fprintf(stderr, "threads = 0 runs astar_seq on the same pairs\n");
         return 1;
@@ -287,12 +292,15 @@ int main(int argc, char** argv) {
     int run = argc > 6 ? std::atoi(argv[6]) : 1;
     std::string open_arg = argc > 7 ? argv[7] : "list";
     std::string mode_arg = argc > 8 ? argv[8] : "create";
-    OpenKind kind = open_arg == "heap" ? OpenKind::Heap : OpenKind::List;
+    OpenKind kind = open_arg == "heap" ? OpenKind::Heap : open_arg == "lazy" ? OpenKind::Lazy : OpenKind::List;
     bool pool = mode_arg == "pool";
-    const char* variant = kind == OpenKind::Heap ? (pool ? "par_heap_pool" : "par_heap") : (pool ? "par_pool" : "par");
+    std::string variant_name = kind == OpenKind::Heap ? "par_heap" : kind == OpenKind::Lazy ? "par_lazy" : "par";
+    if (pool) variant_name += "_pool";
+    const char* variant = variant_name.c_str();
     std::printf("variant,threads,run,src,dst,cost_m,expanded,stale_pops,pruned,list_len_avg,ms\n");
     if (threads > 0 && pool) {
         if (kind == OpenKind::Heap) run_pool<OpenHeap>(g, pairs, threads, run, variant);
+        else if (kind == OpenKind::Lazy) run_pool<LazyList<ParKey, lock_ttas>>(g, pairs, threads, run, variant);
         else run_pool<FineList<ParKey, lock_ttas>>(g, pairs, threads, run, variant);
         return 0;
     }
