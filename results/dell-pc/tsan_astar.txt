@@ -1,11 +1,29 @@
-mode          threads     result status
-correct             1      5/5   PASS
-correct             2      5/5   PASS
-correct             4      5/5   PASS
-first-touch         1      0/5   no wrong cost (info)
-first-touch         2      0/5   no wrong cost (info)
-first-touch         4      0/5   no wrong cost (info)
-h x 3               1      5/5   BUG DETECTED (ok)
-h x 3               2      5/5   BUG DETECTED (ok)
-h x 3               4      5/5   BUG DETECTED (ok)
+mode         variant     threads     result status
+correct      list              1      5/5   PASS
+correct      list              2      5/5   PASS
+correct      list              4      5/5   PASS
+correct      heap              1      5/5   PASS
+correct      heap              2      5/5   PASS
+correct      heap              4      5/5   PASS
+correct      list_pool         1      5/5   PASS
+correct      list_pool         2      5/5   PASS
+correct      list_pool         4      5/5   PASS
+correct      heap_pool         1      5/5   PASS
+correct      heap_pool         2      5/5   PASS
+correct      heap_pool         4      5/5   PASS
+first-touch  list              1      0/5   no wrong cost (info)
+first-touch  list              2      0/5   no wrong cost (info)
+first-touch  list              4      0/5   no wrong cost (info)
+h x 3        list              1      5/5   BUG DETECTED (ok)
+h x 3        list              2      5/5   BUG DETECTED (ok)
+h x 3        list              4      5/5   BUG DETECTED (ok)
+h x 3        heap              1      5/5   BUG DETECTED (ok)
+h x 3        heap              2      5/5   BUG DETECTED (ok)
+h x 3        heap              4      5/5   BUG DETECTED (ok)
+h x 3        list_pool         1      5/5   BUG DETECTED (ok)
+h x 3        list_pool         2      5/5   BUG DETECTED (ok)
+h x 3        list_pool         4      5/5   BUG DETECTED (ok)
+h x 3        heap_pool         1      5/5   BUG DETECTED (ok)
+h x 3        heap_pool         2      5/5   BUG DETECTED (ok)
+h x 3        heap_pool         4      5/5   BUG DETECTED (ok)
 ALL AS EXPECTED
