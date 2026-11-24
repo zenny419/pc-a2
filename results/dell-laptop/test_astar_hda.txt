@@ -1,0 +1,26 @@
+mode             batch     threads     result status
+correct          1               1     50/50  PASS
+correct          1               2     50/50  PASS
+correct          1               4     50/50  PASS
+correct          1               8     50/50  PASS
+correct          64              1     50/50  PASS
+correct          64              2     50/50  PASS
+correct          64              4     50/50  PASS
+correct          64              8     50/50  PASS
+ignore-inflight  1               1      0/50  no messages on 1 thread (info)
+ignore-inflight  1               2     10/50  BUG DETECTED (ok)
+ignore-inflight  1               4     10/50  BUG DETECTED (ok)
+ignore-inflight  1               8     48/50  BUG DETECTED (ok)
+ignore-inflight  64              1      0/50  no messages on 1 thread (info)
+ignore-inflight  64              2     50/50  BUG DETECTED (ok)
+ignore-inflight  64              4     39/50  BUG DETECTED (ok)
+ignore-inflight  64              8     50/50  BUG DETECTED (ok)
+h x 3            1               1     48/50  BUG DETECTED (ok)
+h x 3            1               2     48/50  BUG DETECTED (ok)
+h x 3            1               4     47/50  BUG DETECTED (ok)
+h x 3            1               8     50/50  BUG DETECTED (ok)
+h x 3            64              1     48/50  BUG DETECTED (ok)
+h x 3            64              2     46/50  BUG DETECTED (ok)
+h x 3            64              4     45/50  BUG DETECTED (ok)
+h x 3            64              8     44/50  BUG DETECTED (ok)
+ALL AS EXPECTED
