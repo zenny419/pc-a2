@@ -15,7 +15,7 @@ NPROC2 := $(shell echo $$(( 2 * $(NPROC) )))
 
 HEADERS := $(wildcard $(INC)/*.h)
 
-.PHONY: all astar test tsan bench dist clean test_astar tsan_astar
+.PHONY: all astar test tsan bench dist clean test_astar tsan_astar hda test_hda tsan_hda
 
 all: $(BUILD)/test_list $(BUILD)/bench_list $(BUILD)/astar_seq $(BUILD)/astar_par $(BUILD)/test_astar_par $(BUILD)/astar_batch $(BUILD)/spawn_bench
 
@@ -54,6 +54,23 @@ tsan_astar: $(BUILD)/test_astar_par_tsan
   echo "TSAN: clean"; exit $$status
 
 astar: $(BUILD)/astar_seq
+
+hda: $(BUILD)/astar_hda $(BUILD)/test_astar_hda
+
+$(BUILD)/astar_hda: $(SRC)/astar_hda.cpp $(SRC)/astar_par.cpp $(SRC)/astar_seq.cpp $(HEADERS) | $(BUILD)
+> $(CXX) $(CXXFLAGS) $< -o $@
+$(BUILD)/test_astar_hda: $(SRC)/test_astar_hda.cpp $(SRC)/astar_hda.cpp $(SRC)/astar_par.cpp $(SRC)/astar_seq.cpp $(HEADERS) | $(BUILD)
+> $(CXX) $(CXXFLAGS) $< -o $@
+$(BUILD)/test_astar_hda_tsan: $(SRC)/test_astar_hda.cpp $(SRC)/astar_hda.cpp $(SRC)/astar_par.cpp $(SRC)/astar_seq.cpp $(HEADERS) | $(BUILD)
+> $(CXX) $(TSANFLAGS) $< -o $@
+
+test_hda: $(BUILD)/test_astar_hda
+> $(BUILD)/test_astar_hda $(ROOT)/data/nodes.csv $(ROOT)/data/edges.csv 50 7 $(NPROC)
+tsan_hda: $(BUILD)/test_astar_hda_tsan
+> @$(BUILD)/test_astar_hda_tsan $(ROOT)/data/nodes.csv $(ROOT)/data/edges.csv 5 7 4 0 > $(BUILD)/tsan_hda.log 2>&1; \
+  status=$$?; cat $(BUILD)/tsan_hda.log; \
+  if grep -q "WARNING: ThreadSanitizer" $(BUILD)/tsan_hda.log; then echo "TSAN: data race reported"; exit 1; fi; \
+  echo "TSAN: clean"; exit $$status
 
 OPS_OVER := 200
 

@@ -1,0 +1,45 @@
+== start 2026-11-25 02:22:01 machine=dell-pc nproc=12 threads=[1 2 4 8 12 24 ] runs=5 pairs=10 batches=[1 64]
+make: Nothing to be done for 'all'.
+make: Nothing to be done for 'hda'.
+== test_astar_hda (02:22:01)
+mode             batch     threads     result status
+correct          1               1     50/50  PASS
+correct          1               2     50/50  PASS
+correct          1               4     50/50  PASS
+correct          1               8     50/50  PASS
+correct          1              12     50/50  PASS
+correct          64              1     50/50  PASS
+correct          64              2     50/50  PASS
+correct          64              4     50/50  PASS
+correct          64              8     50/50  PASS
+correct          64             12     50/50  PASS
+ignore-inflight  1               1      0/50  no messages on 1 thread (info)
+ignore-inflight  1               2     12/50  BUG DETECTED (ok)
+ignore-inflight  1               4     12/50  BUG DETECTED (ok)
+ignore-inflight  1               8     14/50  BUG DETECTED (ok)
+ignore-inflight  1              12     32/50  BUG DETECTED (ok)
+ignore-inflight  64              1      0/50  no messages on 1 thread (info)
+ignore-inflight  64              2     50/50  BUG DETECTED (ok)
+ignore-inflight  64              4     44/50  BUG DETECTED (ok)
+ignore-inflight  64              8     28/50  BUG DETECTED (ok)
+ignore-inflight  64             12     48/50  BUG DETECTED (ok)
+h x 3            1               1     48/50  BUG DETECTED (ok)
+h x 3            1               2     48/50  BUG DETECTED (ok)
+h x 3            1               4     49/50  BUG DETECTED (ok)
+h x 3            1               8     47/50  BUG DETECTED (ok)
+h x 3            1              12     48/50  BUG DETECTED (ok)
+h x 3            64              1     48/50  BUG DETECTED (ok)
+h x 3            64              2     48/50  BUG DETECTED (ok)
+h x 3            64              4     47/50  BUG DETECTED (ok)
+h x 3            64              8     44/50  BUG DETECTED (ok)
+h x 3            64             12     47/50  BUG DETECTED (ok)
+ALL AS EXPECTED
+ALL AS EXPECTED
+TSAN: clean
+== astar hda (02:22:05)
+astar hda run 1 done (02:22:09)
+astar hda run 2 done (02:22:12)
+astar hda run 3 done (02:22:17)
+astar hda run 4 done (02:22:20)
+astar hda run 5 done (02:22:24)
+== done 2026-11-25 02:22:24
