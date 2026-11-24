@@ -1,0 +1,3 @@
+settle_limit,prep_s,nodes,edges,shortcuts,upward_edges,ch_correct,unpacked_path_ok,first_meet_wrong,exp_dijkstra,exp_astar,settled_ch,reduction_vs_astar_pct,ms_dijkstra,ms_astar,ms_ch
+50,5.27,32895,75383,70434,145817,50/50,50/50,17/50,14590,4226,95,97.8,18.24,9.68,0.260
+saved /home/hoangyenduong/pc-a2/results/ch.csv
