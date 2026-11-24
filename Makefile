@@ -17,7 +17,7 @@ HEADERS := $(wildcard $(INC)/*.h)
 
 .PHONY: all astar test tsan bench dist clean test_astar tsan_astar
 
-all: $(BUILD)/test_list $(BUILD)/bench_list $(BUILD)/astar_seq $(BUILD)/astar_par $(BUILD)/test_astar_par
+all: $(BUILD)/test_list $(BUILD)/bench_list $(BUILD)/astar_seq $(BUILD)/astar_par $(BUILD)/test_astar_par $(BUILD)/astar_batch
 
 $(BUILD):
 > mkdir -p $@
@@ -40,6 +40,8 @@ $(BUILD)/test_astar_par: $(SRC)/test_astar_par.cpp $(SRC)/astar_par.cpp $(SRC)/a
 > $(CXX) $(CXXFLAGS) $< -o $@
 $(BUILD)/test_astar_par_tsan: $(SRC)/test_astar_par.cpp $(SRC)/astar_par.cpp $(SRC)/astar_seq.cpp $(HEADERS) | $(BUILD)
 > $(CXX) $(TSANFLAGS) $< -o $@
+$(BUILD)/astar_batch: $(SRC)/astar_batch.cpp $(SRC)/astar_seq.cpp $(HEADERS) | $(BUILD)
+> $(CXX) $(CXXFLAGS) $< -o $@
 
 test_astar: $(BUILD)/test_astar_par
 > $(BUILD)/test_astar_par $(ROOT)/data/nodes.csv $(ROOT)/data/edges.csv 50 7 $(NPROC)
