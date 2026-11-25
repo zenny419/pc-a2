@@ -24,10 +24,15 @@ def edge_time(length, t, speeds=SPEEDS):
 def astar_time_dependent(adj, coords, s, d, t0=0.0, speeds=SPEEDS, use_h=True):
     vmax = max(speeds)
     target = coords[d]
-    h = (lambda v: haversine(coords[v], target) / vmax) if use_h else (lambda v: 0.0)
+    if use_h == "dynamic":
+        h = lambda v, t: edge_time(haversine(coords[v], target), t, speeds)
+    elif use_h:
+        h = lambda v, t: haversine(coords[v], target) / vmax
+    else:
+        h = lambda v, t: 0.0
     arr = {s: t0}
     prev, closed, ctr = {s: None}, set(), itertools.count()
-    pq = [(t0 + h(s), next(ctr), s)]
+    pq = [(t0 + h(s, t0), next(ctr), s)]
     expanded = 0
     while pq:
         _, _, u = heapq.heappop(pq)
@@ -42,7 +47,7 @@ def astar_time_dependent(adj, coords, s, d, t0=0.0, speeds=SPEEDS, use_h=True):
             a = arr[u] + edge_time(length, arr[u], speeds)
             if a < arr.get(v, math.inf):
                 arr[v], prev[v] = a, u
-                heapq.heappush(pq, (a + h(v), next(ctr), v))
+                heapq.heappush(pq, (a + h(v, a), next(ctr), v))
     return math.inf, None, expanded
 
 

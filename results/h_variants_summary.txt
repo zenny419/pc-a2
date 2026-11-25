@@ -11,6 +11,12 @@ both,0.4,40,50/50,1.917,14.261,6418,+51.9,4133
 time-dependent A* on the same 50 pairs, departure t0 = 0
 cost equals time-dependent Dijkstra: 50/50
 mean expanded: h = haversine / 600 m/min: 6509; h = 0: 14589 (-55.4%)
+dynamic h(v, t) = edge_time(haversine, t): cost equals Dijkstra 50/50; mean expanded 4226 (-35.1% vs static h, -71.0% vs h = 0)
+time-dependent A* on the same 50 pairs, departure t0 = 7.5
+cost equals time-dependent Dijkstra: 50/50
+mean expanded: h = haversine / 600 m/min: 6527; h = 0: 14589 (-55.3%)
+dynamic h(v, t) = edge_time(haversine, t): cost equals Dijkstra 50/50; mean expanded 4226 (-35.3% vs static h, -71.0% vs h = 0)
 teacher pair: travel time 40.72 min (Dijkstra 40.72), 18951.6 m, expanded 15280 with h, 29108 with h = 0
+teacher pair, dynamic h: travel time 40.72 min, expanded 9581
 saved /home/hoangyenduong/pc-a2/results/h_variants.csv
 ALL AS EXPECTED

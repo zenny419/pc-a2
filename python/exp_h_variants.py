@@ -102,26 +102,37 @@ def run_noisy(adj, coords, nodes, pairs, seed, writer):
 
 def run_time_dependent(adj, coords, pairs):
     vmax = max(SPEEDS)
-    match = 0
-    exp_h = exp_0 = 0
-    for s, d, _, _ in pairs:
-        ca, _, ea = astar_time_dependent(adj, coords, s, d)
-        cd, _, ed = astar_time_dependent(adj, coords, s, d, use_h=False)
-        match += abs(ca - cd) <= TOL
-        exp_h += ea
-        exp_0 += ed
     n = len(pairs)
-    print(f"time-dependent A* on the same {n} pairs, departure t0 = 0")
-    print(f"cost equals time-dependent Dijkstra: {match}/{n}")
-    print(f"mean expanded: h = haversine / {vmax} m/min: {exp_h / n:.0f}; h = 0: {exp_0 / n:.0f} "
-          f"({100 * (exp_h / exp_0 - 1):+.1f}%)")
+    all_ok = True
+    for t0 in (0.0, 7.5):
+        match = match_dyn = 0
+        exp_h = exp_dyn = exp_0 = 0
+        for s, d, _, _ in pairs:
+            ca, _, ea = astar_time_dependent(adj, coords, s, d, t0)
+            cy, _, ey = astar_time_dependent(adj, coords, s, d, t0, use_h="dynamic")
+            cd, _, ed = astar_time_dependent(adj, coords, s, d, t0, use_h=False)
+            match += abs(ca - cd) <= TOL
+            match_dyn += abs(cy - cd) <= TOL
+            exp_h += ea
+            exp_dyn += ey
+            exp_0 += ed
+        print(f"time-dependent A* on the same {n} pairs, departure t0 = {t0:g}")
+        print(f"cost equals time-dependent Dijkstra: {match}/{n}")
+        print(f"mean expanded: h = haversine / {vmax} m/min: {exp_h / n:.0f}; h = 0: {exp_0 / n:.0f} "
+              f"({100 * (exp_h / exp_0 - 1):+.1f}%)")
+        print(f"dynamic h(v, t) = edge_time(haversine, t): cost equals Dijkstra {match_dyn}/{n}; "
+              f"mean expanded {exp_dyn / n:.0f} ({100 * (exp_dyn / exp_h - 1):+.1f}% vs static h, "
+              f"{100 * (exp_dyn / exp_0 - 1):+.1f}% vs h = 0)")
+        all_ok = all_ok and match == n and match_dyn == n
     s, d = map(int, open(DATA / "sample_pair.txt").read().split())
     ct, path, et = astar_time_dependent(adj, coords, s, d)
+    cy, _, ey = astar_time_dependent(adj, coords, s, d, use_h="dynamic")
     c0, _, e0 = astar_time_dependent(adj, coords, s, d, use_h=False)
     length = sum(adj[u][v] for u, v in zip(path, path[1:]))
     print(f"teacher pair: travel time {ct:.2f} min (Dijkstra {c0:.2f}), {length:.1f} m, "
           f"expanded {et} with h, {e0} with h = 0")
-    return match == n and abs(ct - c0) <= TOL
+    print(f"teacher pair, dynamic h: travel time {cy:.2f} min, expanded {ey}")
+    return all_ok and abs(ct - c0) <= TOL and abs(cy - c0) <= TOL
 
 
 def main():
