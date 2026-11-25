@@ -1,0 +1,37 @@
+astar, median ms per query (median over pairs); seq: 0.633 ms, 3784 expanded nodes
+threads           1      2      4      8       16
+variant                                          
+hda_b64_pool   0.816  0.776  1.414  5.918   8.019
+hda_pool       0.859  1.494  1.973  3.676  19.199
+par_lazy_pool  1.677  4.215  3.433  3.876   8.491
+
+speedup vs seq
+threads           1      2      4      8      16
+variant                                         
+hda_b64_pool   0.776  0.816  0.448  0.107  0.079
+hda_pool       0.737  0.424  0.321  0.172  0.033
+par_lazy_pool  0.377  0.150  0.184  0.163  0.075
+
+extra expanded nodes vs seq (%)
+threads         1     2      4       8       16
+variant                                        
+hda_b64_pool   0.0  54.7  496.6  1377.2  2644.2
+hda_pool       0.0   6.6   40.0   117.5  1318.3
+par_lazy_pool  0.0   0.0    0.1     0.4     1.0
+
+hda: remote message fraction, load imbalance (max/mean expanded per thread), stale pops (median)
+                      remote_frac  imbalance  stale_pops
+variant      threads                                    
+hda_b64_pool 1              0.000      1.000       277.0
+             2              0.522      1.029       540.0
+             4              0.803      1.068      1910.0
+             8              0.908      1.078      6176.0
+             16             0.952      1.058      9100.0
+hda_pool     1              0.000      1.000       277.0
+             2              0.525      1.021       323.0
+             4              0.807      1.098       414.0
+             8              0.908      1.096      1290.0
+             16             0.952      1.056      5632.0
+
+cost identical across all variants, threads and runs: True (11 pairs)
+rows: ref 330, hda 550

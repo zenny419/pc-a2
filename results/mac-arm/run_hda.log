@@ -1,0 +1,49 @@
+== start 2026-11-25 16:27:08 machine=mac-arm nproc=8 threads=[1 2 4 8 16 ] runs=5 pairs=10 batches=[1 64]
+Makefile:23: *** missing separator.  Stop.
+== start 2026-11-25 16:48:59 machine=mac-arm nproc=8 threads=[1 2 4 8 16 ] runs=5 pairs=10 batches=[1 64]
+mkdir -p /Users/minhthe.do/pc-a2-hda/pc-a2/build
+c++ -std=c++20 -O2 -Wall -Wextra -pthread -I/Users/minhthe.do/pc-a2-hda/pc-a2/include /Users/minhthe.do/pc-a2-hda/pc-a2/src/test_list.cpp -o /Users/minhthe.do/pc-a2-hda/pc-a2/build/test_list
+c++ -std=c++20 -O2 -Wall -Wextra -pthread -I/Users/minhthe.do/pc-a2-hda/pc-a2/include /Users/minhthe.do/pc-a2-hda/pc-a2/src/bench_list.cpp -o /Users/minhthe.do/pc-a2-hda/pc-a2/build/bench_list
+c++ -std=c++20 -O2 -Wall -Wextra -pthread -I/Users/minhthe.do/pc-a2-hda/pc-a2/include /Users/minhthe.do/pc-a2-hda/pc-a2/src/astar_seq.cpp -o /Users/minhthe.do/pc-a2-hda/pc-a2/build/astar_seq
+c++ -std=c++20 -O2 -Wall -Wextra -pthread -I/Users/minhthe.do/pc-a2-hda/pc-a2/include /Users/minhthe.do/pc-a2-hda/pc-a2/src/astar_par.cpp -o /Users/minhthe.do/pc-a2-hda/pc-a2/build/astar_par
+c++ -std=c++20 -O2 -Wall -Wextra -pthread -I/Users/minhthe.do/pc-a2-hda/pc-a2/include /Users/minhthe.do/pc-a2-hda/pc-a2/src/test_astar_par.cpp -o /Users/minhthe.do/pc-a2-hda/pc-a2/build/test_astar_par
+c++ -std=c++20 -O2 -Wall -Wextra -pthread -I/Users/minhthe.do/pc-a2-hda/pc-a2/include /Users/minhthe.do/pc-a2-hda/pc-a2/src/astar_batch.cpp -o /Users/minhthe.do/pc-a2-hda/pc-a2/build/astar_batch
+c++ -std=c++20 -O2 -Wall -Wextra -pthread -I/Users/minhthe.do/pc-a2-hda/pc-a2/include /Users/minhthe.do/pc-a2-hda/pc-a2/src/spawn_bench.cpp -o /Users/minhthe.do/pc-a2-hda/pc-a2/build/spawn_bench
+c++ -std=c++20 -O2 -Wall -Wextra -pthread -I/Users/minhthe.do/pc-a2-hda/pc-a2/include /Users/minhthe.do/pc-a2-hda/pc-a2/src/astar_hda.cpp -o /Users/minhthe.do/pc-a2-hda/pc-a2/build/astar_hda
+c++ -std=c++20 -O2 -Wall -Wextra -pthread -I/Users/minhthe.do/pc-a2-hda/pc-a2/include /Users/minhthe.do/pc-a2-hda/pc-a2/src/test_astar_hda.cpp -o /Users/minhthe.do/pc-a2-hda/pc-a2/build/test_astar_hda
+== test_astar_hda (16:49:12)
+mode             batch     threads     result status
+correct          1               1     50/50  PASS
+correct          1               2     50/50  PASS
+correct          1               4     50/50  PASS
+correct          1               8     50/50  PASS
+correct          64              1     50/50  PASS
+correct          64              2     50/50  PASS
+correct          64              4     50/50  PASS
+correct          64              8     50/50  PASS
+ignore-inflight  1               1      0/50  no messages on 1 thread (info)
+ignore-inflight  1               2     38/50  BUG DETECTED (ok)
+ignore-inflight  1               4     37/50  BUG DETECTED (ok)
+ignore-inflight  1               8     45/50  BUG DETECTED (ok)
+ignore-inflight  64              1      0/50  no messages on 1 thread (info)
+ignore-inflight  64              2     49/50  BUG DETECTED (ok)
+ignore-inflight  64              4     49/50  BUG DETECTED (ok)
+ignore-inflight  64              8     48/50  BUG DETECTED (ok)
+h x 3            1               1     47/50  BUG DETECTED (ok)
+h x 3            1               2     44/50  BUG DETECTED (ok)
+h x 3            1               4     47/50  BUG DETECTED (ok)
+h x 3            1               8     45/50  BUG DETECTED (ok)
+h x 3            64              1     47/50  BUG DETECTED (ok)
+h x 3            64              2     45/50  BUG DETECTED (ok)
+h x 3            64              4     43/50  BUG DETECTED (ok)
+h x 3            64              8     45/50  BUG DETECTED (ok)
+ALL AS EXPECTED
+ALL AS EXPECTED
+TSAN: clean
+== astar hda (16:49:19)
+astar hda run 1 done (16:49:23)
+astar hda run 2 done (16:49:25)
+astar hda run 3 done (16:49:27)
+astar hda run 4 done (16:49:30)
+astar hda run 5 done (16:49:32)
+== done 2026-11-25 16:49:32
