@@ -14,21 +14,22 @@ Duong Hoang Yen. Report: `DHY_Parallel_Computing_Assignment_2.pdf`. Code: this a
 | 2 | Correctness | `src/test_list.cpp`, `include/test_util.h` | 3.2 |
 | 2 | Performance in a chosen scenario | `src/bench_list.cpp`, `include/bench_util.h` | 5.1, 5.2 |
 | 3 | Sequential + parallel A* in C++ | `include/graph.h`, `src/astar_seq.cpp`, `src/astar_par.cpp` | 4.1–4.3 |
-| 3 | Correctness | `src/test_astar_par.cpp` | 4.4 |
-| 3 | Performance and scalability, all versions, all machines | `src/astar_batch.cpp`, `src/spawn_bench.cpp`, `scripts/run_all.sh`, `scripts/plot_all.py`, `results/<machine>/` | 5.3–5.5, 5.7 |
-| 4 | Other optimizations (optional) | `src/astar_par.cpp` (pruning, heap, pool), `src/astar_batch.cpp`, `python/exp_weighted.py`, `python/exp_alt.py`, `python/exp_ch.py` | 5.6 |
+| 3 | Correctness | `src/test_astar_par.cpp`, `src/test_astar_hda.cpp` | 4.4 |
+| 3 | Performance and scalability, all versions, all machines | `src/astar_batch.cpp`, `src/spawn_bench.cpp`, `scripts/run_all.sh`, `scripts/plot_all.py`, `scripts/run_hda.sh`, `scripts/summarize_hda.py`, `results/<machine>/` | 5.3–5.5, 5.7 |
+| 4 | Other optimizations (optional) | `src/astar_par.cpp` (pruning, heap, pool), `src/astar_hda.cpp` (HDA*), `src/astar_batch.cpp`, `python/exp_weighted.py`, `python/exp_alt.py`, `python/exp_ch.py` | 5.6 |
 
 ## How to re-run all checks
 
 ```
 make all && make test && make tsan             # Part 2
 make test_astar && make tsan_astar             # Part 3
+make hda && make test_hda && make tsan_hda     # Part 3: HDA*
 python python/test_astar.py data/nodes.csv data/edges.csv 100
 python python/test_variants.py data/nodes.csv data/edges.csv
 python python/exp_alt.py 50 42 4,8,16           # Part 4: ALT
 python python/exp_ch.py 50 42 50                # Part 4: contraction hierarchies
 ```
-Expected output: `ALL AS EXPECTED` for every C++ test, no `WARNING: ThreadSanitizer` line, `FAIL: 0` for the Python tests. `scripts/run_all.sh <machine>` repeats the C++ tests before every measurement run and stores the logs in `results/<machine>/`.
+Expected output: `ALL AS EXPECTED` for every C++ test, no `WARNING: ThreadSanitizer` line, `FAIL: 0` for the Python tests. `scripts/run_all.sh <machine>` and `scripts/run_hda.sh <machine>` repeat the C++ tests before every measurement run and store the logs in `results/<machine>/`.
 
 ## Part 1 — Sequential A* (Python)
 
@@ -54,8 +55,8 @@ Expected output: `ALL AS EXPECTED` for every C++ test, no `WARNING: ThreadSaniti
 
 | | |
 |---|---|
-| Property | Returned cost equals the Dijkstra optimum; returned path is valid (starts at s, ends at d, existing edges, sums to the cost); no data race. Same for all six variants (sorted list / heap / lazy list × threads per query / pool) and for `astar_batch`. |
-| Method | `test_astar_par` against a C++ Dijkstra; ThreadSanitizer build (`make tsan_astar`). Negative control: heuristic ×3 must give wrong costs. Termination argued in report Section 4.2 (`pending` counter). |
-| Configuration | Real graph; 50 random pairs (seed 7); six variants at 1/2/4/8/12 threads. Benchmarks: 11 pairs × 5 runs, every variant and thread count; `astar_batch`: 500 pairs vs `batch_seq`. |
-| Result | 50/50 correct for every variant and thread count; control: 42–49 of 50 wrong (BUG DETECTED); TSan clean; all benchmark costs equal to `astar_seq`; `astar_batch` 500/500 equal to `batch_seq`. |
+| Property | Returned cost equals the Dijkstra optimum; returned path is valid (starts at s, ends at d, existing edges, sums to the cost); no data race. Same for all six variants (sorted list / heap / lazy list × threads per query / pool), for HDA* (batch 1 and 64) and for `astar_batch`. |
+| Method | `test_astar_par` against a C++ Dijkstra; ThreadSanitizer build (`make tsan_astar`). `test_astar_hda` for HDA*. Negative controls: heuristic ×3 must give wrong costs; for HDA*, also a termination check that ignores in-flight messages. Termination argued in report Section 4.2 (`pending` counter) and in the HDA* section (`work` counter). |
+| Configuration | Real graph; 50 random pairs (seed 7); three machines: Dell PC (1/2/4/8/12 threads), Dell laptop and Mac M1 Pro (1/2/4/8 threads); six variants and HDA*. Benchmarks: 11 pairs × 5 runs, every variant and thread count; `astar_batch`: 500 pairs vs `batch_seq`. |
+| Result | 50/50 correct for every variant and thread count on all three machines; control ×3: 42–49 of 50 wrong (six variants), 43–50 of 50 (HDA*); HDA* ignoring in-flight messages: 10–50 of 50 wrong at ≥ 2 threads (BUG DETECTED); TSan clean; all benchmark costs equal to `astar_seq`; `astar_batch` 500/500 equal to `batch_seq`. |
 | Limitations | On a road network a wrong stopping rule rarely changes the cost, so the stopping rule is also supported by an argument (report Section 4.2), not only by tests. |
