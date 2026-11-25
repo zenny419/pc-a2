@@ -1,11 +1,3 @@
-"""
-export_graph.py — downloads the HCMC road network from OpenStreetMap and saves 2 CSV files shared by Python and C++.
-Idea taken from HW_Q2's run.py, but:
-  - the download area must contain the instructor's 2 sample points (Thu Thiem -> Thu Duc), not just HCMUT - Ben Thanh;
-  - it saves an EDGE LIST + COORDINATES (A* needs coordinates to compute h), not an adjacency matrix.
-Run (in WSL, venv with osmnx installed):  python python/export_graph.py
-(works from any directory: all paths are built from ROOT)
-"""
 import csv
 from pathlib import Path
 

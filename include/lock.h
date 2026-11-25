@@ -15,10 +15,8 @@
 #include <omp.h>
 #endif
 
-// 128 B covers Apple Silicon; avoids false sharing
 constexpr std::size_t CACHE_LINE = 128;
 
-// spin-wait hint, saves power while spinning
 inline void cpu_relax() {
 #if defined(_MSC_VER) && (defined(_M_X64) || defined(_M_IX86))
     _mm_pause();
@@ -39,7 +37,7 @@ class Backoff {
 public:
     void pause() {
         if constexpr (Kind == BackoffKind::SLEEP) {
-            std::this_thread::sleep_for(std::chrono::nanoseconds(delay)); // on macOS sleep_for(ns) actually sleeps a few us
+            std::this_thread::sleep_for(std::chrono::nanoseconds(delay));
         } else {
             for (unsigned i = 0; i < delay; ++i) cpu_relax();
         }

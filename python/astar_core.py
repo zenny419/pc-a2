@@ -1,8 +1,3 @@
-"""
-astar_core.py — Part 1: sequential A* + reference Dijkstra.
-The graph is read from data/nodes.csv (id,x,y) and data/edges.csv (u,v,length).
-x = longitude, y = latitude (osmnx convention). length is in metres.
-"""
 import csv
 import heapq
 import itertools
@@ -64,7 +59,6 @@ def dijkstra(adj, s, d):
     return math.inf, None, expanded
 
 
-# weight > 1: weighted A*, fewer expansions but path may not be optimal
 def astar(adj, coords, s, d, h=None, weight=1.0):
     if h is None:
         target = coords[d]

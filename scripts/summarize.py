@@ -1,12 +1,3 @@
-"""
-summarize.py — aggregates repeated measurements: median, min, max, number of runs.
-Every column other than the measured one is treated as "configuration" for grouping.
-
-Example (5 runs of bench_list appended to the same file):
-  python scripts/summarize.py results/dell-laptop/list.csv --value ops_per_sec
-  python scripts/summarize.py results/dell-laptop/astar.csv --value ms --drop run
-  -> writes <file>_summary.csv; use this file to plot charts with min-max bars.
-"""
 import argparse
 import csv
 import statistics

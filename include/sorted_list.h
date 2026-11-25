@@ -54,7 +54,6 @@ class FineList {
     struct Node { Key key{}; Node* next = nullptr; bool tail = false; Lock lock; };
     Node head_, tail_;
     void find(const Key& k, Node*& pred, Node*& curr) {
-        // hand-over-hand: curr stays locked while the next node is locked
         pred = &head_; pred->lock.acquire();
         curr = pred->next; curr->lock.acquire();
         while (!curr->tail && curr->key < k) {

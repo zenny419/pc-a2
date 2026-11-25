@@ -68,7 +68,7 @@ def uncertain_experiment(adj, coords, s, d, runs=30, noise=0.2, seed=0):
     assert 0 <= noise < 0.5, "need 1 - 2*noise > 0"
     rng = random.Random(seed)
     level = edge_noise_levels(adj, noise, rng)
-    fmax = 1 + 2 * noise                      
+    fmax = 1 + 2 * noise
     worst = {e: 1 - n for e, n in level.items()}
     r_adj, r_speeds = scaled_problem(adj, worst, fmax,
                                      [sp * (1 - noise) for sp in SPEEDS])
@@ -77,7 +77,7 @@ def uncertain_experiment(adj, coords, s, d, runs=30, noise=0.2, seed=0):
         "robust": astar_time_dependent(r_adj, coords, s, d, speeds=r_speeds)[1],
     }
     if plans["mean"] is None:
-        return {k: (float("nan"), float("nan")) for k in plans}   
+        return {k: (float("nan"), float("nan")) for k in plans}
     gaps = {k: [] for k in plans}
     for _ in range(runs):
         sp = noisy_speeds(rng, noise)
@@ -102,16 +102,16 @@ def astar_pareto(adj, ttime, coords, s, d, vmax_mpm):
     def h(v):
         x = haversine(coords[v], target)
         return (x, x / vmax_mpm)
-    labels = {s: [(0.0, 0.0)]}               
+    labels = {s: [(0.0, 0.0)]}
     ctr = itertools.count()
     pq = [(h(s), next(ctr), (0.0, 0.0), s, (s,))]
     sols = []
     while pq:
-        f, _, g, u, path = heapq.heappop(pq)  
+        f, _, g, u, path = heapq.heappop(pq)
         if any(dominates(sg, f) or sg == f for sg, _ in sols):
-            continue                          
+            continue
         if g not in labels.get(u, []):
-            continue                          
+            continue
         if u == d:
             sols.append((g, list(path)))
             continue

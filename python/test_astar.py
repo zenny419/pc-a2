@@ -1,8 +1,3 @@
-"""
-test_astar.py — A* correctness test: compares costs with Dijkstra on N random node pairs.
-Run:  python python/test_astar.py data/nodes.csv data/edges.csv 100
-No arguments -> builds a small grid graph to test on.
-"""
 import random
 import sys
 import time
