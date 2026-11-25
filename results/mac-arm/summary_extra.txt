@@ -1,0 +1,21 @@
+list, priority-queue mix (remove_min + add), median ops/s
+threads            1        2        4        8        16
+variant                                                  
+coarse+std   10106000  5754000  2169000  2646000  2276000
+coarse+ttas  10290000  7664000  5114000  3690000  1748000
+fine+std      2267000  1027000   465000   284000   220000
+fine+ttas     7946000   888000   490000   209000     3000
+lazy+ttas     5252000  4982000  3234000  2290000  1197000
+
+astar, median ms per query (median over pairs); seq: 0.589 ms
+threads           1       2      4       8         16
+variant                                              
+par            1.709  10.361  9.016  24.315  1173.556
+par_heap       1.359   1.979  3.725   5.265     5.280
+par_heap_pool  0.849   1.673  3.191   4.475     4.514
+par_lazy       2.248   4.334  4.052   5.068     7.945
+par_lazy_pool  1.739   2.157  3.420   4.745     4.293
+par_pool       1.399   9.197  8.952  33.227   131.618
+
+cost identical across all variants, threads and runs: True (11 pairs)
+rows: list_pq 125, astar_extra 1705

@@ -1,0 +1,72 @@
+== start 2026-11-25 15:43:58 machine=mac-arm nproc=8 threads=[1 2 4 8 16 ] runs=5 secs=2 pairs=10
+make: Nothing to be done for `all'.
+== test_astar_par (15:43:58)
+mode         variant     threads     result status
+correct      list              1     50/50  PASS
+correct      list              2     50/50  PASS
+correct      list              4     50/50  PASS
+correct      list              8     50/50  PASS
+correct      heap              1     50/50  PASS
+correct      heap              2     50/50  PASS
+correct      heap              4     50/50  PASS
+correct      heap              8     50/50  PASS
+correct      list_pool         1     50/50  PASS
+correct      list_pool         2     50/50  PASS
+correct      list_pool         4     50/50  PASS
+correct      list_pool         8     50/50  PASS
+correct      heap_pool         1     50/50  PASS
+correct      heap_pool         2     50/50  PASS
+correct      heap_pool         4     50/50  PASS
+correct      heap_pool         8     50/50  PASS
+correct      lazy              1     50/50  PASS
+correct      lazy              2     50/50  PASS
+correct      lazy              4     50/50  PASS
+correct      lazy              8     50/50  PASS
+correct      lazy_pool         1     50/50  PASS
+correct      lazy_pool         2     50/50  PASS
+correct      lazy_pool         4     50/50  PASS
+correct      lazy_pool         8     50/50  PASS
+first-touch  list              1      0/50  no wrong cost (info)
+first-touch  list              2      0/50  no wrong cost (info)
+first-touch  list              4      0/50  no wrong cost (info)
+first-touch  list              8      4/50  wrong costs (info)
+h x 3        list              1     47/50  BUG DETECTED (ok)
+h x 3        list              2     47/50  BUG DETECTED (ok)
+h x 3        list              4     47/50  BUG DETECTED (ok)
+h x 3        list              8     44/50  BUG DETECTED (ok)
+h x 3        heap              1     47/50  BUG DETECTED (ok)
+h x 3        heap              2     48/50  BUG DETECTED (ok)
+h x 3        heap              4     48/50  BUG DETECTED (ok)
+h x 3        heap              8     48/50  BUG DETECTED (ok)
+h x 3        list_pool         1     47/50  BUG DETECTED (ok)
+h x 3        list_pool         2     47/50  BUG DETECTED (ok)
+h x 3        list_pool         4     47/50  BUG DETECTED (ok)
+h x 3        list_pool         8     45/50  BUG DETECTED (ok)
+h x 3        heap_pool         1     47/50  BUG DETECTED (ok)
+h x 3        heap_pool         2     48/50  BUG DETECTED (ok)
+h x 3        heap_pool         4     48/50  BUG DETECTED (ok)
+h x 3        heap_pool         8     48/50  BUG DETECTED (ok)
+h x 3        lazy              1     47/50  BUG DETECTED (ok)
+h x 3        lazy              2     47/50  BUG DETECTED (ok)
+h x 3        lazy              4     47/50  BUG DETECTED (ok)
+h x 3        lazy              8     44/50  BUG DETECTED (ok)
+h x 3        lazy_pool         1     47/50  BUG DETECTED (ok)
+h x 3        lazy_pool         2     46/50  BUG DETECTED (ok)
+h x 3        lazy_pool         4     47/50  BUG DETECTED (ok)
+h x 3        lazy_pool         8     48/50  BUG DETECTED (ok)
+ALL AS EXPECTED
+ALL AS EXPECTED
+TSAN: clean
+== bench_list pq (15:44:23)
+list pq run 1 done (15:45:16)
+list pq run 2 done (15:46:09)
+list pq run 3 done (15:47:01)
+list pq run 4 done (15:47:53)
+list pq run 5 done (15:48:45)
+== astar extra (15:48:45)
+astar extra run 1 done (15:49:39)
+astar extra run 2 done (15:50:33)
+astar extra run 3 done (15:51:17)
+astar extra run 4 done (15:52:09)
+astar extra run 5 done (15:52:58)
+== done 2026-11-25 15:52:58

@@ -1,0 +1,9 @@
+[Frame 3 – Configuration] threads=8 ops/thread=2000 repeats=2
+  coarse+ttas        real     PASS                    2/2  correct
+  coarse+std         real     PASS                    2/2  correct
+  fine+ttas          real     PASS                    2/2  correct
+  fine+std           real     PASS                    2/2  correct
+  lazy+ttas          real     PASS                    2/2  correct
+  racy (control)     control  BUG DETECTED (ok)       0/2  correct   | first failure: return value != shadow, observed=1882, expected=1884
+ALL AS EXPECTED
+TSAN: clean

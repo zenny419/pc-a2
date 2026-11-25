@@ -1,0 +1,47 @@
+
+list median ops/s
+threads              1        2        4        8        16
+variant                                                    
+coarse+std      3106000  1930000  1067000  1293000  1365000
+coarse+ttas     3200000  2941000  2633000  2257000  1131000
+coarse+ttas_bo  3291000  3049000  2796000  2330000  1057000
+fine+std         710000   315000   179000   136000   113000
+fine+ttas       2289000   329000   157000    85000     1000
+fine+ttas_bo    1982000   353000   162000    93000        0
+lazy+ttas        821000  1381000  3038000  5027000  2649000
+lazy+ttas_bo     829000  1378000  3049000  4997000  2838000
+
+astar per thread count (median over pairs)
+ threads  speedup_median  speedup_min  speedup_max  ms_median  seq_ms_median  extra_expanded_pct  stale  pruned  list_len  cost_ok  rel_speedup_median
+       1           0.405        0.300        0.509      1.710          0.594               0.000  277.0   205.0     172.0      1.0               1.000
+       2           0.077        0.051        0.257      5.882          0.594               0.050  278.0   205.0     171.2      1.0               0.205
+       4           0.073        0.043        0.112      8.187          0.594               0.151  278.0   205.0     168.8      1.0               0.181
+       8           0.045        0.030        0.090     19.806          0.594               0.503  281.0   210.0     165.0      1.0               0.120
+      16           0.001        0.000        0.079   1273.803          0.594               1.574  281.0   232.0     162.7      1.0               0.002
+cost identical to astar_seq on all pairs/threads: True
+
+astar variants: median ms per query (median over pairs)
+threads           1      2      4       8         16
+variant                                             
+par            1.710  5.882  8.187  19.806  1273.803
+par_heap       1.373  1.856  3.658   5.029     5.086
+par_heap_pool  0.778  1.371  2.921   4.499     5.123
+par_pool       1.371  7.497  7.669  12.033  1285.736
+seq: 0.594 ms
+
+astar_batch: batch_seq median 1518.2 qps
+ threads  qps_median  speedup_median  speedup_min  speedup_max  cost_match_min  n_queries
+       1      1523.6           1.004        0.994        1.034             500        500
+       2      3119.0           2.054        1.975        2.057             500        500
+       4      6057.0           3.990        3.949        4.026             500        500
+       8      8951.3           5.896        5.553        6.231             500        500
+      16      8871.2           5.843        5.643        6.127             500        500
+all queries match the reference: True
+
+thread start cost (us, median of runs)
+threads      1     2     4     8      16
+variant                                 
+pool_wake   3.2   5.3   9.2  31.6   50.6
+spawn      16.9  29.2  54.6  95.9  203.2
+
+saved: astar_speedup.png, astar_time.png, astar_variants.png, batch_speedup.png, list_throughput.png + results/weighted_astar.png, results/pareto_teacher.png

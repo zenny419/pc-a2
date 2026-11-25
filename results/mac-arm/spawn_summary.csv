@@ -1,0 +1,11 @@
+variant,threads,us_median
+pool_wake,1,3.21
+pool_wake,2,5.29
+pool_wake,4,9.25
+pool_wake,8,31.62
+pool_wake,16,50.58
+spawn,1,16.92
+spawn,2,29.25
+spawn,4,54.58
+spawn,8,95.88
+spawn,16,203.21
