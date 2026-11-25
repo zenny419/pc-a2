@@ -1,0 +1,16 @@
+graph: 32895 nodes, 75882 edge rows, 75383 distinct (u, v) after merging parallel edges
+noisy h on 50 pairs (seed 42)
+baseline eps=0: mean expanded 4226, same cost and count as astar(): 50/50
+mode,eps,bound_pct,within_bound,mean_excess_pct,max_excess_pct,mean_expanded,vs_exact_pct,mean_reexpanded
+under,0.1,0,50/50,0.000,0.000,5591,+32.3,1034
+under,0.2,0,50/50,0.000,0.000,6749,+59.7,1980
+under,0.4,0,50/50,0.000,0.000,8728,+106.6,3636
+both,0.1,10,50/50,0.023,0.850,5289,+25.2,1673
+both,0.2,20,50/50,0.424,6.430,5645,+33.6,2687
+both,0.4,40,50/50,1.917,14.261,6418,+51.9,4133
+time-dependent A* on the same 50 pairs, departure t0 = 0
+cost equals time-dependent Dijkstra: 50/50
+mean expanded: h = haversine / 600 m/min: 6509; h = 0: 14589 (-55.4%)
+teacher pair: travel time 40.72 min (Dijkstra 40.72), 18951.6 m, expanded 15280 with h, 29108 with h = 0
+saved /home/hoangyenduong/pc-a2/results/h_variants.csv
+ALL AS EXPECTED
